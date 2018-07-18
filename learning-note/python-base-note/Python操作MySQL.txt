@@ -1,0 +1,428 @@
+
+eclipse安装Python插件
+
+客户端 <==> 业务逻辑层 <==> 数据访问层（底层、核心技术）<==> 数据库
+
+
+课程内容：
+1.Python访问DB的官方规范
+2.Python开发DB程序的开发环境
+3.Python访问DB的connection、cursor两大对象
+4.Python执行增删改查操作实例
+5.完整实例：银行转账实现
+
+1.Python访问DB的官方规范
+	Python DB API
+	python程序和数据交互：
+		python程序 <==connection=====cursor==> 数据库服务器
+		数据库连接对象connection相当于建造python程序和数据库之间的高速公路
+		数据库交互对象cursor相当于跑在高速公路上的货车
+		数据库异常类exceptions，在数据交互过程中出现问题
+		connection提交事务
+		cursor关闭
+		connection关闭
+
+2.Python开发DB程序的开发环境
+	Python环境下程序 <==> Python-MySQL connector <==> MySQL服务器
+	下载MySQL-python并安装
+	测试，在Eclipse环境下，创建pyDev工程，创建包neu.scse，创建test_mysqldb.py
+	test_mysqldb.py文件内容：
+	import MySQLdb  #引入模块
+	print MySQLdb   #测试
+
+3.Python访问DB的connection、cursor两大对象
+	(1)数据库连接对象connection
+		连接对象：建立Python客户端与数据库的网络连接
+		创建方法：MySQLdb.Connect（参数）
+			参数名		类型		说明
+			host		字符串		MySQL服务器地址
+			port		数字 		MySQL服务器端口号
+			user		字符串		用户名
+			passwd		字符串		密码
+			db 			字符串		数据库名称
+			charset		字符串		连接编码
+		connection对象支持的方法
+			方法名		说明
+			cursor()	使用该连接创建并返回游标
+			commit()	提交当前事务
+			rollback()	回滚当前事务
+			close()		关闭连接
+		示例：
+		test_connection.py
+			import MySQLdb
+			conn = MySQLdb.Connect(
+									host = '127.0.0.1',
+									port = '3306',
+									user = 'root',
+									passwd = 'root'
+									db = 'PythonDB',
+									charset = 'utf8'
+								   )
+			cursor = conn.cursor()
+			print conn
+			print cursor
+			cursor.close()
+			conn.close()
+	(2)数据库游标对象cursor
+		游标对象：用于执行查询和获取结果
+		cursor对象支持的方法：
+			参数名				说明
+			execute(op[,args])	执行一个数据查询和命令
+			fetchone()			取的结果集的下一行
+			fetchmany(size)		获取结果集的下几行
+			fetchall()			获取结果集中剩下的所有行
+			rowcount			不是一个方法，最近一次execute返回数据的行数或影响行数
+			close()				关闭游标对象
+
+			execute(sql)执行流程：
+				客户端execute(sql)，把sql发送到MySQL服务器并执行，把执行结果返回该客户端的本地缓冲区
+
+			fetch*()方法：
+				可以对本地缓冲区中的数据进行遍历
+				移动rownumber（类似于指针），返回数据
+				rownumber初始值是0
+				fetchone():
+					cursor指向0，++rownumber结果是1，返回（cursor，rownumber]之间记录，
+					cursor指向rownumber
+				fetchmany(3):
+					cursor指向1，rownumber += 3，rownumber结果是4，则会返回(cursor,rownumber]之间记录，
+					也即是返回2-4三条记录，cursor指向rownumber即是4
+				fetchall():
+					cursor指向4，返回(4,:)，即返回第4条以后的记录，不包括4本身
+
+			rowcount:
+				不是一个方法，最近一次execute返回数据的行数或影响行数
+				
+
+4.Python执行增删改查操作实例
+	流程：
+	创建connection --> 获取cursor --> 执行execute方法
+	[--> 使用fectch*方法获取数据] --> 关闭cursor --> 关闭connection
+
+	(1)查询数据，select语句
+	示例：
+		test_select.py
+			import MySQLdb
+			conn = MySQLdb.Connect(
+									host = '127.0.0.1',
+									port = '3306',
+									user = 'root',
+									passwd = 'root'
+									db = 'PythonDB',
+									charset = 'utf8'
+								   )
+			cursor = conn.cursor()
+
+			sql = 'select * from user'
+			cursor.execute(sql)
+
+			print cursor.rowcount
+
+			row = cursor.fetchone()
+			print row
+
+			rows = cursor.fetchmany(3)
+			print rs
+
+			rows = cursor.fetchall() # 返回的是元组的元组，每一条记录是一个元组
+			print rows
+			# 遍历结果
+			for row in rs:
+				print "userid = %s, username = %s" % row
+			
+			cursor.close()
+			conn.close()
+	(2)更新数据，insert,delete,update语句
+		cursor.execute(i/u/d) --> 异常 ？ conn.rollback()回滚事务 : conn.commit()提交事务
+		事务：访问和更新数据库的一个程序执行单元
+		 -原子性：事务中包括的所有操作要么都执行，要么都不执行
+		 		  A给B转账100，A少100和B多100都需要做
+		 -一致性：事务必须使数据库从一致性状态变到另一个一致性状态
+		 		  A给B转账100，A少100和B多100是一致的
+		 -隔离性：一个事务的执行不能被其他事物干扰
+		 		  A账户涨利息10%，此时B账户给A转账100
+		 -持久性：事务一旦提交，它对数据库的改变是永久性的
+		怎么使用事物：
+			-关闭自动commit：设置conn.autocommit(False)，默认即为关闭状态
+			-正常结束事务：conn.commit()
+			-异常结束事务：conn.rollback()
+		示例：
+		test_uid.py
+			import MySQLdb
+			conn = MySQLdb.Connect(
+									host = '127.0.0.1',
+									port = '3306',
+									user = 'root',
+									passwd = 'root'
+									db = 'PythonDB',
+									charset = 'utf8'
+								   )
+			cursor = conn.cursor()
+
+			sql_insert = "insert into user(userid, username) values(10,'name10')"
+			sql_update = "update user set username='gengxin' where userid=9"
+			sql_delete = "delete from user where userid < 3"
+			
+			# cursor.exeute(sql_insert)
+			# print cursor.rowcount  # 1
+
+			# cursor.exeute(sql_update)
+			# print cursor.rowcount # 1
+
+			# cursor.execute(sql_delete)
+			# print cursor.rowcount # 2
+
+			# conn.commit()
+
+			# 故意制造一个错误，如sql_delete语句中user表名写错了
+			# 现在把三条更新语句看做一个整体，事务
+			try:
+				cursor.exeute(sql_insert)
+				print cursor.rowcount  # 1
+
+				cursor.exeute(sql_update)
+				print cursor.rowcount # 1
+
+				cursor.execute(sql_delete)
+				print cursor.rowcount # 2
+
+				conn.commit()
+			except Exception as e:
+				print e
+				conn.rollback()
+
+
+			cursor.close()
+			conn.close()
+
+5.完整实例：银行转账实现
+	关键：事务
+	示例：
+	创建数据表
+	create talbe `account`(
+		`acctid` int (11) default null comment '账户ID'
+		`money` int (11) default null comment '余额'
+	)engine = INNODB DEFAULT CHARSET = utf8;
+	--不能设置为MyISAM引擎，它不支持事务机制
+
+	transfer_money.py
+		# coding:utf8
+		import sys   # 接收参数
+		import MySQLdb
+
+		if __name__ == "__main__":
+			source_acctid = sys.argv[1]  # 接收第一个参数
+			target_acctid = sys.argv[2]
+			money = sys.argv[3]
+
+			conn = MySQLdb.Connect(
+				host = '127.0.0.1',
+				user = 'root',
+				passwd = 'root',
+				port = 3306,
+				db = 'PythonDB'
+			)
+
+			tr_money = TransferMoney(conn)  # 该类封装了转账业务
+
+			try:
+				tr_money.transfer(source_acctid, target_acctid, money)
+			except Exception as e:
+				print "出现异常：" + str(e)
+			finally:
+				conn.close()
+
+		代码编写是采用自顶向下设，先抽象后具体的方法，还没有类就先使用，然后再需要什么就创建什么
+		class TransferMoney:
+			def __init__(self, conn):
+				self.conn = conn
+
+			def transfer(self, source_acctid, target_acctid, money):
+				try:
+					self.check_acct_available(source_acctid)
+					self.check_acct_available(target_acctid)
+					self.has_enough_money(source_acctid, money)
+					self.reduce_money(source_acctid, money)
+					self.add_money(target_acctid, money)
+					self.conn.commit()
+				except Exception as e:
+					self.conn.rollback()
+					raise e
+
+			def check_acct_available(self, acctid):
+				cursor = self.conn.cursor()
+				try:
+					sql = "select * from account where acctid = %s" % acctid
+					cursor.execute(sql)
+					print "check_acct_available: " + sql
+					rows = cursor.fetchall()
+					if len(rows) != 1:
+						raise Exception("账号%s不存在" % acctid)
+				finally:
+					cursor.close()
+
+			def has_enough_money(self, acctid, money):
+				cursor = self.conn.cursor()
+				try:
+					sql = "select * from account where acctid = %s and money >= %s" % (acctid,money)
+					cursor.execute(sql)
+					print "has_enough_money: " + sql
+					rows = cursor.fetchall()
+					if len(rows) != 1:
+						raise Exception("账号%s余额不足" % acctid)
+				finally:
+					cursor.close()
+
+			def reduce_money(self, acctid, money):
+				cursor = self.conn.cursor()
+				try:
+					sql = "update account set money = money - %s where acctid = %s" % (money,acctid)
+					cursor.execute(sql)
+					print "reduce_money: " + sql
+					if cursor.rowcount != 1:
+						raise Exception("账号%s减款失败" % acctid)
+				finally:
+					cursor.close()
+
+			def add_money(self, acctid, money):
+				cursor = self.conn.cursor()
+				try:
+					sql = "update account set money = money + %s where acctid = %s" % (money,acctid)
+					cursor.execute(sql)
+					print "reduce_money: " + sql
+					if cursor.rowcount != 1:
+						raise Exception("账号%s加款失败" % acctid)
+				finally:
+					cursor.close()
+
+
+
+
+总结：
+	Python DB API
+	 -connection:建立数据库连接
+	 -cursor：执行SQL、获取数据
+
+	开发数据库程序流程
+	 (1)创建connection对象，获取cursor
+	 (2)使用cursor执行SQL
+	 (3)使用cursor获取数据、判断执行状态
+	 (4)提交事务或者回滚事务
+	 (5)关闭crusor、关闭connection
+
+
+
+==========================================================
+
+
+
+import pymysql.cursors
+
+# Connect to the database
+connection = pymysql.connect(host='127.0.0.1',
+                             port=3306,
+                             user='root',
+                             password='zhyea.com',
+                             db='employees',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
+
+
+
+
+
+也可以使用字典进行连接参数的管理，我觉得这样子更优雅一些：
+import pymysql.cursors
+
+config = {
+          'host':'127.0.0.1',
+          'port':3306,
+          'user':'root',
+          'password':'zhyea.com',
+          'db':'employees',
+          'charset':'utf8mb4',
+          'cursorclass':pymysql.cursors.DictCursor,
+          }
+
+# Connect to the database
+connection = pymysql.connect(**config)
+
+
+
+
+插入数据：
+
+执行sql语句前需要获取cursor，因为配置默认自动提交，故在执行sql语句后需要主动commit，最后不要忘记关闭连接：
+
+from datetime import date, datetime, timedelta
+import pymysql.cursors
+
+#连接配置信息
+config = {
+          'host':'127.0.0.1',
+          'port':3306,
+          'user':'root',
+          'password':'zhyea.com',
+          'db':'employees',
+          'charset':'utf8mb4',
+          'cursorclass':pymysql.cursors.DictCursor,
+          }
+# 创建连接
+connection = pymysql.connect(**config)
+
+# 获取明天的时间
+tomorrow = datetime.now().date() + timedelta(days=1)
+
+# 执行sql语句
+try:
+    with connection.cursor() as cursor:
+        # 执行sql语句，插入记录
+        sql = 'INSERT INTO employees (first_name, last_name, hire_date, gender, birth_date) VALUES (%s, %s, %s, %s, %s)'
+        cursor.execute(sql, ('Robin', 'Zhyea', tomorrow, 'M', date(1989, 6, 14)));
+    # 没有设置默认自动提交，需要主动提交，以保存所执行的语句
+    connection.commit()
+
+finally:
+    connection.close();
+
+
+
+
+
+执行查询：
+import datetime
+import pymysql.cursors
+
+#连接配置信息
+config = {
+          'host':'127.0.0.1',
+          'port':3306,
+          'user':'root',
+          'password':'zhyea.com',
+          'db':'employees',
+          'charset':'utf8mb4',
+          'cursorclass':pymysql.cursors.DictCursor,
+          }
+# 创建连接
+connection = pymysql.connect(**config)
+
+# 获取雇佣日期
+hire_start = datetime.date(1999, 1, 1)
+hire_end = datetime.date(2016, 12, 31)
+
+# 执行sql语句
+try:
+    with connection.cursor() as cursor:
+        # 执行sql语句，进行查询
+        sql = 'SELECT first_name, last_name, hire_date FROM employees WHERE hire_date BETWEEN %s AND %s'
+        cursor.execute(sql, (hire_start, hire_end))
+        # 获取查询结果
+        result = cursor.fetchone()
+        print(result)
+    # 没有设置默认自动提交，需要主动提交，以保存所执行的语句
+    connection.commit()
+
+finally:
+    connection.close();
+
+

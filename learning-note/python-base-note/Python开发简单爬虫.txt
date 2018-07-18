@@ -1,0 +1,184 @@
+乒乓球鸡蛋
+JAVA开发工程师
+百度Java数据产品中间件开发高级工程师，擅长Java/Python/Hadoop技术；喜欢快速阅读技术书籍，
+不能忍受一天的停滞不前；崇尚快乐编程，想要把代码写的像艺术。
+
+
+爬虫：一段自动抓取互联网信息的程序
+价值：互联网数据，为我所用。如爬取数据，新闻聚合阅读器，图书价格对比网，Python技术文章
+
+URL管理器：
+	-URL管理器：管理待抓取URL集合和已抓取URL集合
+		--防止重复抓取、防止循环抓取
+	-实现方式
+		--内存			Python内存：待爬取URL集合set()和已爬取URL集合set()
+		--关系数据库	MySQL：urls(url, is_crawled)
+		--缓存数据库	redis：待爬取URL集合set和已爬取URL集合set
+		
+网页下载器：
+	-网页下载器：将互联网上URL对应的网页下载到本地的工具
+	-Python网页下载器：
+		--urllib2：Python官方基础模块
+		--requests：第三方包，更强大
+	-urllib2下载网页的三种方法：
+		--urllib2下载网页方法1：最简洁方法	url----> urllib2.urlopen(url)
+			代码示例：
+				import urllib2
+				# 直接请求
+				response = urllib2.urlopen('http://www.baidu.com')
+				# 获取状态码，如果是200表示获取成功
+				print response.getcode()
+				# 读取内容
+				cont = response.read()
+				
+		--urllib2下载网页方法2：添加data、http header
+			url & data & header ----> urllib2.Request ----> urllib2.urlopen(request)
+			代码示例：
+				import urllib2
+				# 创建Request对象
+				request = urllib2.Request(url)
+				# 添加数据 a = 1
+				request.add_data('a','1')
+				# 添加http的header，伪装成Mozilla浏览器
+				request.add_header('User-Agent', 'Mozilla/5.0')
+				# 发送请求获取结果
+				response = urllib2.urlopen(request)
+				
+		--urllib2下载网页方法3：
+		
+		python 3.x中urllib库和urilib2库合并成了urllib库
+		其中urllib2.urlopen()变成了urllib.request.urlopen()
+			urllib2.Request()变成了urllib.request.Request() 
+			
+		测试三种抓取网页的方法：
+			#coding:utf8
+
+			import urllib2
+			import cookielib
+
+			url = 'http://www.baidu.com'
+
+			print '第一种抓取网页方法'
+			response1 = urllib2.urlopen(url)
+			print response1.getcode()
+			print len(response1.read())
+
+			print '第二种抓取网页方法'
+			request = urllib2.Request(url)
+			request.add_header('user-agent', 'Mozilla/5.0')
+			response2 = urllib2.urlopen(request)
+			print response2.getcode()
+			print len(response2.read()) 
+
+			print '第三种抓取网页的方法'
+			cj = cookielib.CookieJar()
+			opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+			# 使urllib2具有使用cookie的增强功能
+			urllib2.install_opener(opener)
+			response3 = urllib2.urlopen(url)
+			print response3.getcode()
+			print cj  # 打印cookie
+			print response3.read()
+			
+网页解析器：
+	-网页解析器：从网页中提取有价值数据的工具
+	-Python网页解析器：
+	
+	代码示例：
+		from bs4 import BeautifulSoup
+		html_doc = """
+		
+		
+		"""
+		soup = BeautifulSoup(html_doc, 'html.parser', from_encoding='utf-8')
+		print '获取所有的链接'
+		links = soup.find_all('a')
+		for link in links:
+			# 节点link包含 标签名，链接，文字
+			print link.name, link['href'], link.get_text
+			
+		# 获取指定链接
+		link_node = soup.find('a', href='http://www.baidu.com')
+		# 节点link_node包含 标签名，链接，文字
+		print link_node.name, link_node['href'], link_node.get_text	
+		
+		# 正则匹配
+		link_node = soup.find('a', href=re.compile(r'baidu'))
+		# 节点link_node包含 标签名，链接，文字
+		print link_node.name, link_node['href'], link_node.get_text
+		
+		print '获取p段落文字'
+		p_node = soup.find('p', class_='title')  # 因为class是Python的关键字，所以为class_
+		print p_node.name, p_node.get_text()
+		
+实例爬虫：
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			
+		
+		
+				
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

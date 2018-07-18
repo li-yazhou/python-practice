@@ -1,0 +1,203 @@
+Python错误与异常
+
+第1章 错误和异常概念
+第2章 错误和异常的处理方式
+第3章 标准异常和自动以异常
+
+第1章 错误和异常概念
+内容：
+	错误和异常概念
+	常见的错误
+	异常处理：
+		try-except使用和else使用
+		截获异常
+		try-finally使用
+		异常处理综合使用
+	with..as语句与上下文管理
+	标准异常和自定义异常
+	raise和assert语句
+
+错误和异常概念：
+	错误：
+		1.语法错误：代码不符合解释器或者编译器语法
+		2.逻辑错误：不完整或者不合法输入或者计算出现问题
+	异常：
+		执行过程中出现问题导致程序无法执行
+		1.程序遇到逻辑或者算法问题
+		2.运行过程中计算机错误，如内存不足或者IO错误
+
+常见的错误：
+	NameError
+	SyntaxError
+	IOError
+	ZeroDivisionError
+	ValueError
+
+异常处理：
+	try-except使用和else使用
+		try:
+			try_suite
+		except Exception [,e]:
+			exception_block
+
+	截获异常
+		捕获到运行时异常
+		猜数字游戏：
+		    import random
+			num = random.randint(0,100)
+			while True:
+			    try:
+			        guess = int(raw_input('Enter 1-100'))
+			    except ValueError,e:
+			        print 'Enter 1-100'
+			        continue
+			    if guess > num:
+			        print 'please input a smaller number than ',guess
+			    elif guess < num:
+			        print 'please input a bigger number than ',guess
+			    else:
+			        print 'Right, Game Over'
+			        break
+			    print '\n'
+
+		捕获多个异常：
+			try:
+				try_suite
+			except Exception1 [,e1]:
+				excetpion_block1
+			except Exception2 [,e2]
+				exception_block2
+
+		和else结合使用
+			try:
+				try_suite
+			except Exception [,e]:
+				excetpion_block
+			else:
+				none_exception
+			如果没有异常，则执行完try块中代码后执行else语句中代码
+
+	try-finally使用
+		规则：try-finally无论是否检测到异常，都会执行finally代码
+		作用：为异常处理事件提供清理机制，用来关闭文件或者释放系统资源
+
+	异常处理综合使用try-except-finally
+		try:
+			try_suite
+		except Exception:
+			do_exception
+		else:
+			do_else
+		finally:
+			do_finally
+with..as语句与上下文管理
+	with context [as var]:
+		with_suite
+		1.with语句用来代替try-except-finally语句，使代码更加简洁
+		2.context表达式返回是一个对象
+		3.var用来保存context返回对象，单个返回值或者元组
+		4.with_suite使用var变量来对context返回对象进行操作
+	示例：
+		with open('xx.txt') as f:
+			for line in f.readlines():
+				print line
+
+	with语句实质上是上下文管理机制：
+	(1)上下文管理协议：包含方法__enter__()和__exit__()，支持该协议的对象要实现这两个方法
+	(2)上下文管理器：定义执行with语句时要建立的运行时上下文，负责执行with语句块上下文中的
+	   进入与退出操作
+	(3)进入上下文管理器：调用管理器__enter__方法，如果设置as var语句，var变量接受
+	   __enter__()方法返回值
+	(4)退出上下文管理器：调用管理器__exit__方法
+		class Mycontext(object):
+		    def __init__(self,name):
+		        self.name = name
+
+		    def __enter__(self):
+		        print '__enter__'
+		        return self
+
+		    def do_self(self):
+		        print 'do_self'
+
+		    def __exit__(self,exc_type, exc_value, traceback):
+		        print '__exit__'
+		        print 'Error', exc_type, ' info:',exc_value
+
+		if __name__ == '__main__':
+		    with Mycontext('test context') as f:
+		        print f.name
+		        f.do_self()
+
+		运行结果：
+			__enter__
+			test context
+			do_self
+			__exit__
+			Error None  info: None
+
+		with语句应用场景：
+			-文件操作
+			-进程线程之间互斥对象，例如互斥锁
+			-支持上下文的其他对象
+
+
+raise和assert语句
+	raise语句：
+		raise语句用于主动抛出异常
+		语法格式： raise [exception [,args]]
+		exception：异常类
+		args：描述异常信息的元组
+
+	assert语句：
+	断言语句：assert语句用于检测表达式是否为真，如果为假，引发AssertionError错误
+	语法格式：assert exception [,args]
+	exception：表达式
+	args：判断条件的描述信息
+
+标准异常和自定义异常
+标准异常：Python内建异常，程序执行前就已经存在
+所有异常的基类：BaseException
+					--Exception常见错误的积累
+					--KeyboardInterrupt用户中断 Ctrl+c
+					--SystemExit python解释器退出
+		Exception
+			--SyntaxError
+			--NameError
+			--IOError
+			--ImportError
+自定义异常：
+	自定义异常必须继承Exception类	
+	自定义异常只能主动触发	
+
+	自定义异常：class FileError(IOError):
+					pass
+
+	产生自定义异常：assert FileError,'file Error'
+
+	示例：
+		try:
+			raise FileError, 'Test FileError'
+		except FileError ,e:
+			print e
+
+	示例2：
+		class CustomError(Exception):
+			def __init__(self, info):
+				Exception.__init__(self)
+				self.errorinfo = info
+				print id(self)
+
+			def __str__(self):
+				return 'CustomError:s%' %self.errorinfo
+
+		try:
+			raise CustomError('est CustomError')
+		except CustomError, e:
+			print 'ErrorInfo:%d,%s' %(id(e),e)
+
+
+
+
+
+

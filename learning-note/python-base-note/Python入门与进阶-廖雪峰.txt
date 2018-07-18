@@ -1,0 +1,2611 @@
+Python的特点：
+	优雅
+	明确
+	简单
+Python适合的领域
+	Web网站和各种网络服务
+	系统工具和脚本
+	作为"胶水"语言把其他语言开发的模块包装起来方便使用
+Python不适合的领域
+	贴近硬件的代码（首选C），如驱动
+	移动开发，选择ObjC,Swift/Java
+	游戏开发，选择C/C++，游戏需要高速渲染
+Python与其他语言对比
+	语言    	类型			运行速度		代码量
+	C 			编译为机器码	非常快			非常多
+	Java		编译为字节码	快				多
+	Python 		解释执行		慢				少
+	Python开发速度快，现在应用运行速度的瓶颈是数据库操作和网络调用，不在于Python
+	Python源码不能加密，卖软件，源码就被泄露，但是可以像豆瓣的模式，提供服务
+
+====================================================================================
+
+Python变量和数据类型
+
+	数据类型：
+		1.整数
+		2.浮点数
+		3.字符串
+		4.布尔值，True/False
+		5.空值，None，是一个特殊的空值
+
+	print语句：
+		print 'hello, world'
+		print 'hello,', 'world'
+		print会依次打印每个字符串，遇到逗号“,”会输出一个空格
+
+	注释：
+		Python的注释以 # 开头，后面的文字直到行尾都算注释
+
+	Python是一种动态语言：
+		变量本身类型不固定的语言称之为动态语言，Python变量可以被反复的赋值为不同类型的值
+
+	转义字符：
+		\
+
+	raw字符串与多行字符串：
+		在字符串前面加个前缀 r ，表示这是一个 raw 字符串，里面的字符就不需要转义了
+		但是r'...'表示法不能表示多行字符串，也不能表示包含'和 "的字符串
+		如果要表示多行字符串，可以用'''...'''表示
+
+	Unicode字符串：
+		Unicode通常用两个字节表示一个字符，原有的英文编码从单字节变成双字节，只需要把高字节全部填为0就可以。
+		Python在后来添加了对Unicode的支持，以Unicode表示的字符串用u'...'表示，比如：
+			print u'中文'
+			中文
+		如果中文字符串在Python环境下遇到 UnicodeDecodeError，这是因为.
+		py文件保存的格式有问题。可以在第一行添加注释 # -*- coding: utf-8 -*-
+		目的是告诉Python解释器，用UTF-8编码读取源代码，在编写代码时候文件保存方式也要为UTF-8
+
+	布尔运算：
+		非运算，not True/False
+		a = True
+		print a and 'a=T' or 'a=F'
+		结果是'a=T'，因为Python把0、空字符串''和None看成 False，其他数值和非空字符串都看成 True，所以：True and 'a=T' 计算结果是 'a=T'，继续计算 'a=T' or 'a=F' 计算结果还是 'a=T'
+
+			
+===============================================================
+
+List和Tuple类型
+
+List列表：
+	定义List
+	由于Python是动态语言，所以list中包含的元素并不要求都必须是同一种数据类型，我们完全可以在list中包含各种数据：>>> L = ['Michael', 100, True]
+	一个元素也没有的list，就是空list：>>> empty_list = []
+
+	按照索引访问List列表
+		使用索引时，千万注意不要越界。
+
+	倒序访问List
+		可以用 -1 这个索引来表示最后一个元素：>>> print L[-1]
+
+	添加新元素：
+		append(element)
+		insert(index,element),index后面的元素全部后移一位
+
+	删除元素：
+		alist.pop(),删除最后一个元素并返回
+		blist.pop(index),删除指定元素并返回，下标不能越界
+
+	替换元素：
+		alist[index] = newElement，直接给某一索引处元素重新赋值即可
+
+Tuple元组：
+	与list的区别是，tuple一旦定义，就不可在本地更改
+
+	定义元组：
+		用小括号()定义
+		用tuple表示如下：>>> t = ('Adam', 'Lisa', 'Bart')
+
+	创建单元素tuple：
+		tuple和list一样，可以包含 0 个、1个和任意多个元素。
+		包含 0 个元素的 tuple，也就是空tuple，直接用 ()表示：
+			>>> t = ()
+			>>> print t
+			()
+
+		创建包含1个元素的 tuple 
+			>>> t = (1)
+			>>> print t
+			1
+		好像哪里不对！t 不是 tuple ，而是整数1。为什么呢？
+		因为()既可以表示tuple，又可以作为括号表示运算时的优先级，结果 (1) 被Python解释器计算出结果1，导致我们得到的不是tuple，而是整数 1。
+		
+		正是因为用()定义单元素的tuple有歧义，所以 Python 规定，单元素 tuple 要多加一个逗号“,”，这样就避免了歧义：
+			>>> t = (1,)
+			>>> print t
+			(1,)
+		
+		建议，定义元组时，在每一个元素后面都添加上一个逗号','
+
+	"可变"的tuple
+		tuple一旦创建就不能修改。现在，我们来看一个“可变”的tuple：
+		>>> t = ('a', 'b', ['A', 'B'])
+	
+		注意到 t 有 3 个元素：'a'，'b'和一个list：['A', 'B']。
+		list作为一个整体是tuple的第3个元素。list对象可以通过 t[2] 拿到：
+		>>> L = t[2]
+		然后，我们把list的两个元素改一改：
+		>>> L[0] = 'X'
+		>>> L[1] = 'Y'
+		再看看tuple的内容：
+		>>> print t
+		('a', 'b', ['X', 'Y'])
+		但实际上，也是不可变的，t[2]保存的是一个列表变量的地址，是不可更改的，
+		里面的两个元素可以改变，但不可添加新的元素
+
+=====================================================================
+
+条件判断与循环
+
+条件判断：
+	Python代码的缩进规则，具有相同缩进的代码被视为代码块。
+	缩进请严格按照Python的习惯写法：4个空格，不要使用Tab，
+	更不要混合Tab和空格，否则很容易造成因为缩进引起的语法错误。
+
+	如果你在Python交互环境下敲代码，还要特别留意缩进，并且退出缩进需要多敲一行回车。
+
+	if age < 18:
+    print 'teenager'
+
+    if not age >= 18:
+    print 'teenager'
+
+    两种条件判断是“非此即彼”的，符合条件1或者条件2，可以使用if ... else ...语句
+
+
+    if-elif-else语句：
+    	要避免嵌套结构的 if ... else ...，嵌套形式非常混乱，我们可以用if ... 多个elif ... else ... 的结构，一次写完所有的规则，这样形式比较清晰：
+			if age >= 18:
+			    print 'adult'
+			elif age >= 6:
+			    print 'teenager'
+			elif age >= 3:
+			    print 'kid'
+			else:
+			    print 'baby'
+
+	for循环：
+		对于有序数据结构，如list,tuple，以及无序的dict字典都可以进行遍历
+			L = ['Adam', 'Lisa', 'Bart']
+			for name in L:
+			    print name
+
+	while循环：
+
+	break：退出当前循环
+	continue：跳过本次循环，继续下一次循环
+	
+
+	多重循环：
+		for x in ['A', 'B', 'C']:
+   			 for y in ['1', '2', '3']:
+        		print x + y
+
+
+====================================================        		
+
+Dict和Set类型
+
+Dict字典：
+	定义字典：
+		d = {
+	    'Adam': 95,
+	    'Lisa': 85,
+	    'Bart': 59
+		}
+
+	由于dict也是集合，len()函数可以计算任意集合的大小
+
+	访问dict元素：
+		使用 d[key] 的形式来查找对应的 value，这和 list 很像，不同之处是，list 必须使用索引返回对应的元素，而dict使用key。
+
+		注意: 通过 key 访问 dict 的value，只要 key存在，dict就返回对应的value。
+		      如果key不存在，会直接报错：KeyError
+		要避免 KeyError 发生，有两个办法：
+			一是先判断一下 key 是否存在，用 in 操作符：
+				if 'Paul' in d:
+				    print d['Paul']
+			如果 'Paul' 不存在，if语句判断为False，自然不会执行 print d['Paul']，
+			从而避免了错误。
+			二是使用dict本身提供的一个 get 方法，在Key不存在的时候，返回None：
+				>>> print d.get('Bart')
+				59
+				>>> print d.get('Paul')
+				None
+
+	dict的特点：
+		(1)查找速度快
+			无论dict有10个元素还是10万个元素，查找速度都一样。而list的查找速度随着元素增加而逐渐下降。
+			不过dict的查找速度快不是没有代价的，dict的缺点是占用内存大，还会浪费很多内容，
+			list正好相反，占用内存小，但是查找速度慢。
+
+		(2)dict的第二个特点就是存储的key-value序对是没有顺序的！
+			不能用dict存储有序的集合。
+
+		(3)key的元素必须不可变，Python的基本类型如字符串、整数、浮点数都是不可变的，
+			都可以作为 key。但是list是可变的，就不能作为 key。
+		    最常用的key还是字符串，因为用起来最方便。
+
+	更新dict：
+		 d['Paul'] = 72
+		 如果 key 已经存在，则赋值会用新的 value 替换掉原来的 value；
+		 否则，dict会添加该key-value键值对。
+
+	遍历dict：
+		>>> d = { 'Adam': 95, 'Lisa': 85, 'Bart': 59 }
+		>>> for key in d:
+				print key
+
+Set集合：
+	set不能包含重复的元素。
+
+	创建集合：
+		s = {1, 2, 3}
+		s = set(['A', 'B', 'C'])			
+
+	set的特点：
+		set的内部结构和dict很像，唯一区别是不存储value，因此判断一个元素是否在set中速度很快
+		set存储的元素和dict的key类似，必须是不变对象，因此，任何可变对象是不能放入set中的。
+		最后，set存储的元素也是没有顺序的。
+
+	set集合的遍历：
+		>>> s = set(['Adam', 'Lisa', 'Bart'])
+		>>> for name in s:
+		       print name
+
+	set更新：
+		>>> s = set([1, 2, 3])
+		>>> s.add(4)
+		>>> s.add(1)  # 集合中已经存在元素1了，不会再添加进集合，但不会报错
+
+		>>> s = set([1, 2, 3, 4])
+		>>> s.remove(4) 
+
+		注意：如果要删除该元素，不存在将会报错，所以用add()可以直接添加，而remove()前需要判断。
+
+===============================================
+
+函数
+
+抽象是数学中非常常见的概念。举个例子：
+计算数列的和，比如：1 + 2 + 3 + ... + 100，写起来十分不方便，于是数学家发明了求和符号∑，
+可以把1 + 2 + 3 + ... + 100记作：
+	100
+	∑n
+	n=1
+这种抽象记法非常强大，因为我们看到∑就可以理解成求和，而不是还原成低级的加法运算。
+而且，这种抽象记法是可扩展的，比如：
+100
+∑(n²+1)
+n=1
+还原成加法运算就变成了：
+(1 x 1 + 1) + (2 x 2 + 1) + (3 x 3 + 1) + ... + (100 x 100 + 1)
+可见，借助抽象，我们才能不关心底层的具体计算过程，而直接在更高的层次上思考问题。
+
+写计算机程序也是一样，函数就是最基本的一种代码抽象的方式。
+
+Python内建函数
+http://docs.python.org/2/library/functions.html#abs
+可以在交互式命令行通过 help(abs) 查看abs函数的帮助信息
+
+return None可以简写为return。
+
+函数返回"多个值"：
+	def move(x,y):
+		return x+1,y+1
+
+	x, y = move(10,10)
+	>>> print x, y
+	在语法上，返回一个tuple可以省略括号，而多个变量可以同时接收一个tuple，按位置赋给对应
+	的值，所以，Python的函数返回多值其实就是返回一个tuple，但写起来更方便。
+
+递归函数：
+	计算阶乘 n! = 1 * 2 * 3 * ... * n
+	def fact(n):
+	    if n==1:
+	        return 1
+	    return n * fact(n - 1)
+
+	递归函数的优点是定义简单，逻辑清晰。
+	理论上，所有的递归函数都可以写成循环的方式，但循环的逻辑不如递归清晰。
+
+	使用递归函数需要注意防止栈溢出。
+	在计算机中，函数调用是通过栈（stack）这种数据结构实现的，每当进入一个函数调用，栈就会加
+	一层栈帧，每当函数返回，栈就会减一层栈帧。由于栈的大小不是无限的，所以，递归调用的次数过
+	多，会导致栈溢出。可以试试计算 fact(10000)。
+
+定义默认参数：
+	int()函数的第二个参数是转换进制，如果不传，默认是十进制 (base=10)。
+	>>> int('123')
+	123
+	>>> int('123', 8)
+	83
+
+	函数的默认参数的作用是简化调用。
+	设置默认值可以减少方法重载的麻烦。
+	注意：由于函数的参数按从左到右的顺序匹配，所以默认参数只能定义在必需参数的后面
+
+定义可变参数：
+	def fn(*args):
+    	print args
+	可变参数的名字前面有个 * 号，我们可以传入0个、1个或多个参数给可变参数
+
+	可变参数也不是很神秘，Python解释器会把传入的一组参数组装成一个tuple传递给可变参数，
+	因此，在函数内部，直接把变量 args 看成一个 tuple 就好了。
+
+	定义可变参数的目的也是为了简化调用。假设我们要计算任意个数的平均值，
+	就可以定义一个可变参数：
+	def average(*args):
+	    ...
+
+======================================================================
+
+切片
+
+切片之前：
+	>>> r = []
+	>>> n = 3
+	>>> for i in range(n):
+	...     r.append(L[i])
+
+	切片（Slice）操作符，能大大简化这种操作。
+
+切片：
+	>>> L[0:3]
+
+	如果第一个索引是0，可以省略：
+	>>> L[:3]
+
+	如果第二个索引是末尾，可以省略：
+	>>> L[2:]
+
+	只用一个 : ，表示从头到尾，L[:]实际上复制出了一个新list。
+	>>> L[:]
+
+	切片操作还可以指定第三个参数，表示步长，
+	>>> L[::2]
+	第三个参数表示每N个取一个，上面的 L[::2] 会每两个元素取出一个来，也就是隔一个取一个。
+
+倒序切片：
+	对于list，既然Python支持L[-1]取倒数第一个元素，那么它同样支持倒数切片，试试：
+	>>> L = ['Adam', 'Lisa', 'Bart', 'Paul']
+
+	>>> L[-2:]
+	['Bart', 'Paul']
+
+	>>> L[:-2]
+	['Adam', 'Lisa']
+
+	>>> L[-3:-1]
+	['Lisa', 'Bart']
+
+	>>> L[-4:-1:2]
+	['Adam', 'Bart']
+
+	记住倒数第一个元素的索引是-1。倒序切片包含起始索引，不包含结束索引。
+
+字符串切片：
+	在很多编程语言中，针对字符串提供了很多各种截取函数，其实目的就是对字符串切片。
+	Python没有针对字符串的截取函数，只需要切片一个操作就可以完成，非常简单。
+
+切片小结：
+	对什么数据类型切片，就返回什么类型的变量，一般用于 list/tuple/str
+
+===================================================
+
+迭代
+
+Python的for循环不仅可以用在list或tuple上，还可以作用在其他任何可迭代对象上。
+无论该集合是有序还是无序，都可以用 for 循环总是可以依次取出集合的每一个元素。
+
+注意: 集合是指包含一组元素的数据结构，我们已经介绍的包括：
+1. 有序集合：list，tuple，str和unicode；
+2. 无序集合：set
+3. 无序集合并且具有 key-value 对：dict
+
+迭代是一个动词，它指的是一种操作，在Python中，就是 for 循环。
+迭代与按下标访问数组最大的不同是，后者是一种具体的迭代实现方式，而前者只关心迭代结果，
+根本不关心迭代内部是如何实现的。
+
+
+索引迭代：
+	Python中，迭代永远是取出元素本身，而非元素的索引。
+
+	对于有序集合，元素确实是有索引的。有的时候，我们确实想在 for 循环中拿到索引，怎么办？
+	方法是使用 enumerate() 函数：
+			>>> L = ['Adam', 'Lisa', 'Bart', 'Paul']
+			>>> for index, name in enumerate(L):
+			...     print index, '-', name
+			... 
+			0 - Adam
+			1 - Lisa
+			2 - Bart
+			3 - Paul
+
+	使用 enumerate() 函数，我们可以在for循环中同时绑定索引index和元素name。但是，这不是 enumerate() 的特殊语法。
+
+	实际上，enumerate() 函数把['Adam', 'Lisa', 'Bart', 'Paul']
+	变成了类似：[(0, 'Adam'), (1, 'Lisa'), (2, 'Bart'), (3, 'Paul')]
+	因此，迭代的每一个元素实际上是一个tuple：
+			for t in enumerate(L):
+			    index = t[0]
+			    name = t[1]
+			    print index, '-', name
+
+	如果我们知道每个tuple元素都包含两个元素，for循环又可以进一步简写为：
+			for index, name in enumerate(L):
+			    print index, '-', name
+	这样不但代码更简单，而且还少了两条赋值语句。
+
+	可见，索引迭代也不是真的按索引访问，而是由 enumerate() 函数自动把每个元素变成 
+	(index, element) 这样的tuple，再迭代，就同时获得了索引和元素本身。
+
+
+迭代dict的value：
+	dict对象本身就是可迭代对象，用 for 循环直接迭代 dict，可以每次拿到dict的一个key。
+
+	迭代 dict 对象的value，dict 对象有一个 values() 方法，
+	它把dict转换成一个包含所有value的list
+		d = { 'Adam': 95, 'Lisa': 85, 'Bart': 59 }
+		print d.values()
+		# [85, 95, 59]
+		for v in d.values():
+		    print v
+		# 85
+		# 95
+		# 59
+	
+	dict的 itervalues() 方法也可以迭代出dict的value：
+		d = { 'Adam': 95, 'Lisa': 85, 'Bart': 59 }
+		print d.itervalues()
+		# <dictionary-valueiterator object at 0x106adbb50>
+		for v in d.itervalues():
+		    print v
+		# 85
+		# 95
+		# 59
+
+	比较values() 和 itervalues() 两个方法：
+	1. values() 方法实际上把一个 dict 转换成了包含 value 的list。
+	2. itervalues() 方法不会转换，它会在迭代过程中依次从 dict 中取出 value，所以 	
+	   itervalues() 方法比 values() 方法节省了生成 list 所需的内存。
+	3. 打印 itervalues() 发现它返回一个 <dictionary-valueiterator> 对象，
+	   这说明在Python中，for 循环可作用的迭代对象远不止 list，tuple，str，unicode，dict等，
+	   任何可迭代对象都可以作用于for循环，而内部如何迭代我们通常并不用关心。
+
+	说明：
+		如果一个对象说自己可迭代，那我们就直接用 for 循环去迭代它。
+		可见，迭代是一种抽象的数据操作，它不对迭代对象内部的数据有任何要求。
+
+迭代dict的key和value：
+	dict 对象的 items() 方法返回的值：
+	items()把dict对象转换成了包含tuple的list，对这个list进行迭代，可以同时获得key和value：
+		>>> for key, value in d.items():
+		...     print key, ':', value
+		... 
+		Lisa : 85
+		Adam : 95
+		Bart : 59
+
+	iteritems()
+	items() 有一个对应的 iteritems()，和 values() 有一个 itervalues() 类似， 
+	iteritems() 不把dict转换成list，而是在迭代过程中不断给出 tuple，
+	所以，iteritems() 不占用额外的内存。
+
+===========================================================
+
+列表生成式
+
+生成列表：
+	range(1, 11)：
+	 	可以生成list [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+	怎么生成[1x1, 2x2, 3x3, ..., 10x10]？
+		方法一是循环：
+			>>> L = []
+			>>> for x in range(1, 11):
+			...    L.append(x * x)
+			... 
+			>>> L
+			[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+
+		但是循环太繁琐，而列表生成式则可以用一行语句代替循环生成上面的list：
+			>>> [x * x for x in range(1, 11)]
+
+			[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+		这种写法就是Python特有的列表生成式。
+		利用列表生成式，可以以非常简洁的代码生成 list。
+
+	写列表生成式时，把要生成的元素 x * x 放到前面，后面跟 for 循环。
+
+复杂表达式：
+	使用for循环的迭代不仅可以迭代普通的list，还可以迭代dict。
+
+	假设有如下的dict：
+	d = { 'Adam': 95, 'Lisa': 85, 'Bart': 59 }
+	完全可以通过一个复杂的列表生成式把它变成一个 HTML 表格：
+	tds = ['<tr><td>%s</td><td>%s</td></tr>' % (name, score) for name, score in d.iteritems()]
+	print '<table>'
+	print '<tr><th>Name</th><th>Score</th><tr>'
+	print '\n'.join(tds)
+	print '</table>'
+
+	注意：
+		字符串可以通过 % 进行格式化，用指定的参数替代 %s。
+		字符串的join()方法可以把一个 list 拼接成一个字符串。
+
+	把打印出来的结果保存为一个html文件，就可以在浏览器中看到效果了：
+	<table border="1">
+	<tr><th>Name</th><th>Score</th><tr>
+	<tr><td>Lisa</td><td>85</td></tr>
+	<tr><td>Adam</td><td>95</td></tr>
+	<tr><td>Bart</td><td>59</td></tr>
+	</table>
+
+条件过滤：
+	列表生成式的 for 循环后面还可以加上 if 判断。例如：
+		>>> [x * x for x in range(1, 11)]
+		[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+
+	如果我们只想要偶数的平方，不改动 range()的情况下，可以加上 if 来筛选：
+		>>> [x * x for x in range(1, 11) if x % 2 == 0]
+		[4, 16, 36, 64, 100]
+	有了 if 条件，只有 if 判断为 True 的时候，才把循环的当前元素添加到列表中。
+
+多层表达式：
+	for循环可以嵌套，因此，在列表生成式中，也可以用多层 for 循环来生成列表。
+
+	对于字符串 'ABC' 和 '123'，可以使用两层循环，生成全排列：
+		>>> [m + n for m in 'ABC' for n in '123']
+		['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3']
+
+	翻译成循环代码就像下面这样：
+		L = []
+		for m in 'ABC':
+		    for n in '123':
+		        L.append(m + n)
+
+
+
+
+
+==================================================================
+
+
+
+Python进阶
+学习内容：
+	函数式编程：注意不是“函数编程”，多一个“式”
+	模块：如何使用模块
+	面向对象编程：面向对象的概念、属性、方法、继承、多态等
+	定制类：利用Python的特殊方法定制类
+
+学习目标：
+	掌握函数式编程
+	掌握面向对象编程
+	能够编写模块化的程序
+
+=======================================
+
+第2章	函数式编程
+
+2.1 函数式编程简介
+
+	函数：function
+	函数式：functional，是一种编程范式
+
+	函数式编程是一种抽象计算的编程模式
+		函数 != 函数式，好比：计算 != 计算机
+
+	不同语言的抽象层次不同
+		低级-------------------------------------------->高级
+		       计算机指令--汇编语言--C语言--Python语言
+		计算机------------------------------------------>计算(计算的本质就是数学)
+
+		计算机硬件执行的是指令
+		C语言可以抽象出来函数
+		Python可以抽象出更高层次的函数式编程
+
+	函数式编程的特点：
+		把计算视为函数而非指令
+		纯函数式编程：不需要变量，没有副作用（一个函数执行很多次结果是一样的），测试简单
+		支持高阶函数，代码简洁
+
+	Python支持的函数式编程
+		不是纯函数式编程：因为它允许有变量
+		支持高阶函数：函数也可以作为变量传入
+		支持闭包：有了闭包就能返回函数
+		有限度地支持匿名函数
+
+
+2.2 高阶函数
+
+	变量可以指向函数
+		f = abs
+		f(-1) == abs(-1)
+	函数名其实就是指向函数的变量
+		abs = len  # 此时abs的功能不再是求绝对值，而是求长度
+		abs(-1)将会报错
+		abs('abc')会返回 3
+
+	高阶函数：能接收函数做参数的函数
+		变量可以指向函数
+		函数的参数可以接收变量
+		一个函数可以接收另一个函数作为参数
+		能接收函数作为参数的函数就是高阶函数
+
+
+2.3 把函数作为参数：
+	示例：接收abs函数
+		定义一个函数，接收 x/y/f 三个参数
+		其中x,y是数值，f是函数
+		def add(x,y,f):
+			return f(x) + f(y)
+
+		add(-5, 9, abs)
+		函数执行的代码实际上是 abs(-5) + abs(9)
+
+	练习：
+		利用add(x,y,f)函数，计算：x、y两个变量的开方之和
+	实现：
+		import math
+		def add(x, y, f):
+		    return f(x) + f(y)
+
+		print add(25, 9, math.sqrt)
+
+2.4 map()函数：
+	map()函数是Python内置的高阶函数，它接收一个函数 f 和一个list，并通过把函数
+	 f 依次作用在list的每个元素上，得到一个新的list并返回。
+	比如，要计算对于list [1, 2, 3, 4, 5, 6, 7, 8, 9]中每个元素的平方并返回，
+	实现如下：
+		def square(x)
+			return x*x
+		print map(square, [1,2, 3, 4, 5, 6, 7, 8, 9])
+		# [1, 4, 9, 10, 25, 36, 49, 64, 81]
+
+		注意：map()函数不改变原有的 list，而是返回一个新的 list。
+
+		利用map()函数，可以把一个 list 转换为另一个 list，只需要传入转换函数。
+		由于list包含的元素可以是任何类型，因此，map() 不仅仅可以处理只包含数值的 list，
+		事实上它可以处理包含任意类型的 list，只要传入的函数f可以处理这种数据类型。
+
+		练习：
+		假设用户输入的英文名字不规范，没有按照首字母大写，后续字母小写的规则，请利用map()函数，把一个list（包含若干不规范的英文名字）变成一个包含规范英文名字的list：
+			输入：['adam', 'LISA', 'barT']
+			输出：['Adam', 'Lisa', 'Bart']
+
+		实现：
+		def format_name(s):
+		    s = s.lower()
+		    return s.capitalize()
+
+		print map(format_name, ['adam', 'LISA', 'barT'])
+
+
+2.5 reduce()函数：
+	reduce()函数也是Python内置的一个高阶函数。
+	reduce()函数接收的参数和 map()类似，一个函数 f，一个list。
+	但行为和 map()不同，reduce()传入的函数 f 必须接收两个参数，
+	reduce()对list的每个元素反复调用函数f，并返回最终结果值。
+
+	例如，编写一个f函数，接收x和y，返回x和y的和：
+		def f(x, y):
+		    return x + y
+	调用 reduce(f, [1, 3, 5, 7, 9])时，reduce函数将做如下计算：
+		先计算头两个元素：f(1, 3)，结果为4；
+		再把结果和第3个元素计算：f(4, 5)，结果为9；
+		再把结果和第4个元素计算：f(9, 7)，结果为16；
+		再把结果和第5个元素计算：f(16, 9)，结果为25；
+		由于没有更多的元素了，计算结束，返回结果25。
+	上述计算实际上是对 list 的所有元素求和。
+	虽然Python内置了求和函数sum()，但是，利用reduce()求和也很简单。
+
+	reduce()还可以接收第3个可选参数，作为计算的初始值。如果把初始值设为100，计算：
+	reduce(f, [1, 3, 5, 7, 9], 100)
+	结果将变为125，因为第一轮计算是：
+		计算初始值和第一个元素：f(100, 1)，结果为101。
+
+	练习：
+		Python内置了求和函数sum()，但没有求积的函数，请利用recude()来求积：
+			输入：[2, 4, 5, 7, 12]
+			输出：2*4*5*7*12的结果
+	实现：
+		def prod(x, y):
+		    return x*y
+
+		print reduce(prod, [2, 4, 5, 7, 12])
+
+
+2.6 filter()函数：
+	filter()函数是 Python 内置的另一个有用的高阶函数。
+	filter()函数接收一个函数 f 和一个list，
+	这个函数 f 的作用是对每个元素进行判断，返回 True或 False，
+	filter() 根据判断结果自动过滤掉不符合条件的元素，返回由符合条件元素组成的新list。
+
+	例如，要从一个list [1, 4, 6, 7, 9, 12, 17]中删除偶数，保留奇数。
+	首先，要编写一个判断奇数的函数：
+		def is_odd(x):
+		    return x % 2 == 1
+
+	然后，利用filter()过滤掉偶数：
+		filter(is_odd, [1, 4, 6, 7, 9, 12, 17])
+		结果：[1, 7, 9, 17]
+
+
+
+	利用filter()，可以完成很多有用的功能，例如，删除 None 或者空字符串：
+		def is_not_empty(s):
+		    return s and len(s.strip()) > 0
+		filter(is_not_empty, ['test', None, '', 'str', '  ', 'END'])
+		结果：['test', 'str', 'END']
+
+
+	注意:
+		s.strip(rm) 删除 s 字符串中开头、结尾处的 rm 序列的字符。
+		当rm为空时，默认删除空白符（包括'\n', '\r', '\t', ' ')，如下：
+			a = '     123'
+			a.strip()
+			结果： '123'
+
+			a='\t\t123\r\n'
+			a.strip()
+			结果：'123'
+
+	练习：
+		请利用filter()过滤出1~100中平方根是整数的数，即结果应该是：
+		[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+
+		# def is_sqr(x):
+		# x = math.sqrt(x)
+		# return type(x) == type(1)
+		# 上面的方法是不可行的
+
+	实现：
+		import math
+		def is_sqr(x):
+		    r = int(math.sqrt(x))
+		    return r*r == x
+
+		print filter(is_sqr, range(1, 101))
+
+
+2.7 自定义排序函数：
+	Python内置的 sorted()函数可对list进行排序：
+			>>>sorted([36, 5, 12, 9, 21])
+			[5, 9, 12, 21, 36]
+
+	但 sorted()也是一个高阶函数，它可以接收一个比较函数来实现自定义排序，比较函数的定义是，传入两个待比较的元素 x, y，如果 x 应该排在 y 的前面，返回 -1，如果 x 应该排在 y 的后面，返回 1。如果 x 和 y 相等，返回 0。
+
+	因此，如果我们要实现倒序排序，只需要编写一个reversed_cmp函数：
+			def reversed_cmp(x, y):
+			    if x > y:
+			        return -1  # 与比较符号一致，是升序，否则为降序
+			    if x < y:
+			        return 1
+			    return 0
+
+	这样，调用 sorted() 并传入 reversed_cmp 就可以实现倒序排序：
+			>>> sorted([36, 5, 12, 9, 21], reversed_cmp)
+			[36, 21, 12, 9, 5]
+
+
+	sorted()也可以对字符串进行排序，字符串默认按照ASCII大小来比较：
+			>>> sorted(['bob', 'about', 'Zoo', 'Credit'])
+			['Credit', 'Zoo', 'about', 'bob']
+	'Zoo'排在'about'之前是因为'Z'的ASCII码比'a'小。
+
+
+	练习：
+		对字符串排序时，有时候忽略大小写排序更符合习惯。
+		请利用sorted()高阶函数，实现忽略大小写排序的算法。
+		输入：['bob', 'about', 'Zoo', 'Credit']
+		输出：['about', 'bob', 'Credit', 'Zoo']
+
+		说明：cmp()函数比较字符串也是根据ASCII大小比较的
+		>>> cmp('a','A')
+		1
+
+	实现：
+		def cmp_ignore_case(s1, s2):
+		    return cmp(s1.lower(), s2.lower())
+
+		print sorted(['bob', 'about', 'Zoo', 'Credit'], cmp_ignore_case)
+
+
+2.8 返回函数：
+	Python的函数不但可以返回int、str、list、dict等数据类型，还可以返回函数！
+
+	例如，定义一个函数 f()，我们让它返回一个函数 g，可以这样写：
+			def f():
+			    print 'call f()...'
+			    # 定义函数g:
+			    def g():
+			        print 'call g()...'
+			    # 返回函数g:
+			    return g
+
+			函数g就是一个函数的内部函数
+
+	在函数 f 内部又定义了一个函数 g。
+	由于函数 g 也是一个对象，函数名 g 就是指向函数 g 的变量，
+	所以，最外层函数 f 可以返回变量 g，也就是函数 g 本身。
+
+	调用函数 f，我们会得到 f 返回的一个函数：
+			>>> x = f()   # 调用f()
+			call f()...
+			>>> x   # 变量x是f()返回的函数：
+			<function g at 0x1037bf320>
+			>>> x()   # x指向函数，因此可以调用
+			call g()...   # 调用x()就是执行g()函数定义的代码
+
+
+	请注意区分返回函数和返回值：
+			def myabs():
+			    return abs   # 返回函数
+			def myabs2(x):
+			    return abs(x)   # 返回函数调用的结果，返回值是一个数值
+
+
+	返回函数可以把一些计算延迟执行。例如，如果定义一个普通的求和函数：
+			def calc_sum(lst):
+			    return sum(lst)
+	调用calc_sum()函数时，将立刻计算并得到结果：
+			>>> calc_sum([1, 2, 3, 4])
+			10
+
+
+	但是，如果返回一个函数，就可以“延迟计算”：
+			def calc_sum(lst):
+			    def lazy_sum():
+			        return sum(lst)
+			    return lazy_sum
+			# 调用calc_sum()并没有计算出结果，而是返回函数:
+
+			>>> f = calc_sum([1, 2, 3, 4])
+			>>> f
+			<function lazy_sum at 0x1037bfaa0>
+			# 对返回的函数进行调用时，才计算出结果:
+
+			>>> f()
+			10
+	由于可以返回函数，我们在后续代码里就可以决定到底要不要调用该函数。
+
+	练习：
+		请编写一个函数calc_prod(lst)，它接收一个list，返回一个函数，
+		返回函数可以计算参数的乘积。
+	实现：
+		def calc_prod(lst):
+
+		    def multiply():
+		        result = 1
+		        for e in lst:
+		            result *= e
+		        return result
+
+		    return multiply
+
+		f = calc_prod([1, 2, 3, 4])
+		print f()
+
+
+
+2.9 闭包：
+	在函数内部定义的函数和外部定义的函数是一样的，只是他们无法被外部访问：
+			def g():
+			    print 'g()...'
+
+			def f():
+			    print 'f()...'
+			    return g
+
+	将 g 的定义移入函数 f 内部，防止其他代码调用 g：
+			def f():
+			    print 'f()...'
+			    def g():
+			        print 'g()...'
+			    return g
+
+	但是，考察上一小节定义的 calc_sum 函数：
+			def calc_sum(lst):
+			    def lazy_sum():
+			        return sum(lst)
+			    return lazy_sum
+
+	注意: 发现没法把 lazy_sum 移到 calc_sum 的外部，因为它引用了 calc_sum 的参数 lst。
+
+	像这种内层函数引用了外层函数的变量（参数也算变量），然后返回内层函数的情况，
+	称为闭包（Closure）。
+
+	闭包的特点是返回的函数还引用了外层函数的局部变量，
+	所以，要正确使用闭包，就要确保引用的局部变量在函数返回后不能变。
+	举例如下：
+			# 希望一次返回3个函数，分别计算1x1,2x2,3x3:
+			def count():
+			    fs = []
+			    for i in range(1, 4):
+			        def f():
+			             return i*i
+			        fs.append(f)
+			    return fs
+
+			f1, f2, f3 = count()
+
+	你可能认为调用f1()，f2()和f3()结果应该是1，4，9，但实际结果全部都是 9（请自己动手验证）。
+
+	原因就是当count()函数返回了3个函数时，这3个函数所引用的变量 i 的值已经变成了3。
+	由于f1、f2、f3并没有被调用，所以，此时他们并未计算 i*i，当 f1 被调用时：
+			>>> f1()
+			9     # 因为f1现在才计算i*i，但现在i的值已经变为3
+	因此，返回函数不要引用任何循环变量，或者后续会发生变化的变量。
+
+	练习：
+		返回闭包不能引用循环变量，请改写count()函数，让它正确返回能计算1x1、2x2、3x3的函数。
+----------------------------------------------------------------------
+	实现：
+		#-*-coding:utf-8-*-
+		def count():
+		    fs = []                 #用于存放计算i＊i的函数地址
+		    for i in range(1, 4):   #遍历［1，2，3］，把计算i＊i的函数地址放fs中
+		        def f(x):#
+		            def d():#
+		                return x*x#
+		            return d#
+
+		        fs.append(f(i))     #
+		    return fs#
+
+		f1, f2, f3 = count()#
+		print f1(), f2(), f3()#
+
+	实现2：
+		def count():
+		    fs = []
+		    for i in range(1, 4):
+		        def f(i):
+		            return lambda : i*i
+		        fs.append(f(i))
+		    return fs
+		f1, f2, f3 = count()
+		print f1(), f2(), f3()
+
+2.10 匿名函数：
+	高阶函数可以接收函数做参数，有些时候，我们不需要显式地定义函数，直接传入匿名函数更方便。
+
+	在Python中，对匿名函数提供了有限支持。还是以map()函数为例，计算 f(x)=x2
+	时，除了定义一个f(x)的函数外，还可以直接传入匿名函数：
+			>>> map(lambda x: x * x, [1, 2, 3, 4, 5, 6, 7, 8, 9])
+			[1, 4, 9, 16, 25, 36, 49, 64, 81]
+
+	通过对比可以看出，匿名函数 lambda x: x * x 实际上就是：
+			def f(x):
+			    return x * x
+
+	关键字lambda 表示匿名函数，冒号前面的 x 表示函数参数。
+
+	匿名函数有个限制，就是只能有一个表达式，不写return，返回值就是该表达式的结果。
+
+	使用匿名函数，可以不必定义函数名，直接创建一个函数对象，很多时候可以简化代码：
+			>>> sorted([1, 3, 9, 5, 0], lambda x,y: -cmp(x,y))
+			[9, 5, 3, 1, 0]
+
+	返回函数的时候，也可以返回匿名函数：
+			>>> myabs = lambda x: -x if x < 0 else x
+			>>> myabs(-1)
+			1
+			>>> myabs(1)
+			1
+
+	练习：
+		利用匿名函数简化以下代码：
+				def is_not_empty(s):
+				    return s and len(s.strip()) > 0
+				filter(is_not_empty, ['test', None, '', 'str', '  ', 'END'])
+	实现：
+		print filter(lambda s : s and len(s.strip()) > 0, ['test', None, '', 'str', '  ', 'END'])
+
+
+http://202.118.27.77:8080/MADYCJGC/password_print_cj_excel?xh=1570984&mima=1570984&btn1=%E4%B8%8B%E8%BD%BD%E6%88%90%E7%BB%A9%E5%8D%95
+
+
+2.11 decorator装饰器：
+	问题：定义了一个函数，想在运行时动态增加功能，又不想改动函数本身的代码
+	示例：
+		希望对下列函数调用增加log功能，打印出函数调用：
+		def f1(x):
+			return x * 2
+
+		def f2():
+			return x * x
+
+		def f3():
+			return x * x * x
+
+		方法一，修改每一个方法如下
+		def f1(x):
+			print 'call f1'
+			return x * 2
+
+		def f2():
+			print 'call f2'
+			return x * x
+
+		def f3():
+			print 'call f3'
+			return x * x * x
+
+		高阶函数：
+			可以接收函数作为参数
+			可以返回函数
+			是否可以接收一个函数，对其包装，然后返回一个新函数？
+
+		方法二：通过高阶函数返回新函数
+			def f1(x):
+				return x * 2
+
+			def new_fn(f):  # 装饰器函数
+				def fn(x):
+					print 'call ' + f.__name__ + '()'  # 添加新功能
+					return f(x)						   # 返回原函数的结果
+				return fn
+
+			调用装饰器函数：
+				g1 = new_fn(f1)
+				print g1(5)
+
+				或者：
+				f1 = new_fn(f1)
+				print f1(5)  # f1的原始定义函数被彻底隐藏了
+
+			装饰器的作用：
+				可以极大地简化代码，避免每个函数编写重复性代码
+					打印日志：@log
+					检测性能：@performance
+					数据库事务：@transaction
+					URL路由：@post('/register')
+
+
+
+
+
+2.12 编写无参数decorator：
+	Python的 decorator 本质上就是一个高阶函数，它接收一个函数作为参数，
+	然后，返回一个新函数。
+
+	使用 decorator 用Python提供的 @ 语法，这样可以避免手动编写 f = decorate(f) 这样的代码。
+	考察一个@log的定义：
+			def log(f):
+			    def fn(x):
+			        print 'call ' + f.__name__ + '()...'
+			        return f(x)
+			    return fn
+
+	对于阶乘函数，@log工作得很好：
+			@log
+			def factorial(n):
+			    return reduce(lambda x,y: x*y, range(1, n+1))
+			print factorial(10)
+			结果：
+			call factorial()...
+			3628800
+
+	但是，对于参数不是一个的函数，调用将报错：
+			@log
+			def add(x, y):
+			    return x + y
+			print add(1, 2)
+			结果：
+			Traceback (most recent call last):
+			  File "test.py", line 15, in <module>
+			    print add(1,2)
+			TypeError: fn() takes exactly 1 argument (2 given)
+	因为 add() 函数需要传入两个参数，但是 @log 写死了只含一个参数的返回函数。
+
+	要让 @log 自适应任何参数定义的函数，可以利用Python的 *args 和 **kw，
+	保证任意个数的参数总是能正常调用：
+			def log(f):
+			    def fn(*args, **kw):
+			        print 'call ' + f.__name__ + '()...'
+			        return f(*args, **kw)
+			    return fn
+
+	现在，对于任意函数，@log 都能正常工作。
+
+	任务：
+		请编写一个@performance，它可以打印出函数调用的时间。
+
+	实现：
+		import time
+		def performance(f):
+		    def print_time(*args, **kw):
+		        print 'call '+f.__name__+'() in '+ time.strftime('%Y-%m-%d',time.localtime(time.time()))
+		        return f(*args,**kw)
+		    return print_time
+
+		@performance
+		def factorial(n):
+		    return reduce(lambda x,y: x*y, range(1, n+1))
+
+		print factorial(10)
+
+	说明：
+		格式化时间 time.strftime('%Y-%m-%d',time.localtime(time.time()))
+
+-------------------------------------------------------------------
+2.13 编写带参数decorator：
+	考察上一节的 @log 装饰器：
+			def log(f):
+			    def fn(x):
+			        print 'call ' + f.__name__ + '()...'
+			        return f(x)
+			    return fn
+	发现对于被装饰的函数，log打印的语句是不能变的（除了函数名）。
+
+	如果有的函数非常重要，希望打印出'[INFO] call xxx()...'，有的函数不太重要，希望打印出'[DEBUG] call xxx()...'，这时，log函数本身就需要传入'INFO'或'DEBUG'这样的参数，类似这样：
+			@log('DEBUG')
+			def my_func():
+			    pass
+
+	把上面的定义翻译成高阶函数的调用，就是：
+			my_func = log('DEBUG')(my_func)
+
+	上面的语句看上去还是比较绕，再展开一下：
+			log_decorator = log('DEBUG')
+			my_func = log_decorator(my_func)
+
+	上面的语句又相当于：
+			log_decorator = log('DEBUG')
+			@log_decorator
+			def my_func():
+			    pass
+
+	所以，带参数的log函数首先返回一个decorator函数，再让这个decorator函数接收my_func并返回新函数：
+
+			def log(prefix):
+			    def log_decorator(f):
+			        def wrapper(*args, **kw):
+			            print '[%s] %s()...' % (prefix, f.__name__)
+			            return f(*args, **kw)
+			        return wrapper
+			    return log_decorator
+
+			@log('DEBUG')
+			def test():
+			    pass
+			print test()
+			执行结果：
+			[DEBUG] test()...
+			None
+
+
+	对于这种3层嵌套的decorator定义，你可以先把它拆开：
+			# 标准decorator:
+			def log_decorator(f):
+			    def wrapper(*args, **kw):
+			        print '[%s] %s()...' % (prefix, f.__name__)
+			        return f(*args, **kw)
+			    return wrapper
+			return log_decorator
+
+			# 返回decorator:
+			def log(prefix):
+			    return log_decorator(f)
+
+	拆开以后会发现，调用会失败，因为在3层嵌套的decorator定义中，最内层的wrapper引用了最外层
+	的参数prefix，所以，把一个闭包拆成普通的函数调用会比较困难。不支持闭包的编程语言要实现同
+	样的功能就需要更多的代码。
+
+	练习：
+		上一节的@performance只能打印秒，请给 @performace 增加一个参数，允许传入's'或'ms'：
+			@performance('ms')
+			def factorial(n):
+			    return reduce(lambda x,y: x*y, range(1, n+1))
+
+	实现：
+		import time
+
+		def performance(unit):
+		    def perf_decorator(f):
+		        def wrapper(*args, **kw):
+		            t1 = time.time()
+		            r = f(*args, **kw)
+		            t2 = time.time()
+		            t = (t2 - t1)*1000 if unit =='ms' else (t2 - t1)
+		            print 'call %s() in %f %s'%(f.__name__, t, unit)
+		            return r
+		        return wrapper
+		    return perf_decorator
+
+		@performance('ms')
+		def factorial(n):
+		    return reduce(lambda x,y: x*y, range(1, n+1))
+
+		print factorial(10)
+
+-------------------------------------------------------------------
+
+2.14 完善decorator：http://www.imooc.com/code/6067
+
+-------------------------------------------------------------------
+
+2.15 偏函数：
+	当一个函数有很多参数时，调用者就需要提供多个参数。
+	如果减少参数个数，就可以简化调用者的负担。
+
+	比如，int()函数可以把字符串转换为整数，当仅传入字符串时，int()函数默认按十进制转换：
+			>>> int('12345')
+			12345
+	但int()函数还提供额外的base参数，默认值为10。如果传入base参数，就可以做 N 进制的转换：
+			>>> int('12345', base=8)
+			5349
+			>>> int('12345', 16)
+			74565
+
+	假设要转换大量的二进制字符串，每次都传入int(x, base=2)非常麻烦，
+	于是，我们想到，可以定义一个int2()的函数，默认把base=2传进去：
+			def int2(x, base=2):
+			    return int(x, base)
+
+	这样，我们转换二进制就非常方便了：
+			>>> int2('1000000')
+			64
+			>>> int2('1010101')
+			85
+
+	functools.partial就是帮助我们创建一个偏函数的，不需要我们自己定义int2()，
+	可以直接使用下面的代码创建一个新的函数int2：
+			>>> import functools
+			>>> int2 = functools.partial(int, base=2)
+			>>> int2('1000000')
+			64
+			>>> int2('1010101')
+			85
+	所以，functools.partial可以把一个参数多的函数变成一个参数少的新函数，
+	少的参数需要在创建时指定默认值，这样，新函数调用的难度就降低了。
+
+	练习：
+		用sorted这个高阶函数中传入自定义排序函数就可以实现忽略大小写排序。
+		请用functools.partial把这个复杂调用变成一个简单的函数：
+				sorted_ignore_case(iterable)
+
+	实现：
+		import functools
+		sorted_ignore_case = functools.partial(sorted,key=str.lower)
+
+		print sorted_ignore_case(['bob', 'about', 'Zoo', 'Credit'])
+
+=======================================================
+
+第3章	模块
+
+3.1 模块和包的概念
+3.2 导入模块
+3.3 动态导入模块
+3.4 使用 __future__
+3.5 安装第三方模块
+
+3.1 模块和包的概念
+为什么要分模块：
+	代码越来越多的时候，将所有代码放入到一个py文件中，无法维护
+	如果将代码分拆放入多个py文件，好处：
+		易于维护
+		同一个名字的变量互不影响
+
+	模块的名字就是py文件的文件名
+
+一个模块中怎么引入其他模块
+	# test.py-------------------自身模块名test
+	import math-----------------引用math模块
+	print math.pow(2,10)--------调用math模块的函数
+
+为什么要分包：
+	模块多了以后，也容易重名，比如同一个工程中，两个都创建了util.py和test.py
+	解决方案是：把同名模块放入到不同的包中，这样同名模块的完整模块名不同
+				如把A的util.py放在p1包中，把B的util.py放到p2包中
+引用完整的模块：
+	# test.py---------------------------自身模块名test
+	import p1.util----------------------引用p1.util模块
+	print p1.util.f(2, 10)--------------调用p1.util模块的f函数
+
+	说明：调用函数时，这个模块名必须完整模块名，除非它声明了别名或者是指明导入特定的函数
+
+在文件系统中：
+	包就是文件夹
+	模块就是xxx.py文件
+	包也可以有多级
+
+如何区分包和普通目录：
+	包下面必须要有一个__init__.py这个特殊的文件
+	注意每层都必须要有！即使这个文件是空文件，也必须存在
+
+
+3.2 导入模块
+
+	要使用一个模块，我们必须首先导入该模块。
+	Python使用import语句导入一个模块。
+	例如，导入系统自带的模块 math：
+			import math
+
+	你可以认为math就是一个指向已导入模块的变量，
+	通过该变量，我们可以访问math模块中所定义的所有公开的函数、变量和类：
+			>>> math.pow(2, 0.5) # pow是函数
+			1.4142135623730951
+
+			>>> math.pi # pi是变量
+			3.141592653589793
+	如果我们只希望导入用到的math模块的某几个函数，而不是所有函数，可以用下面的语句：
+			from math import pow, sin, log
+	这样，可以直接引用 pow, sin, log 这3个函数，但math的其他函数没有导入进来：
+			>>> pow(2, 10)
+			1024.0
+			>>> sin(3.14)
+			0.0015926529164868282
+
+	如果遇到名字冲突怎么办？比如math模块有一个log函数，logging模块也有一个log函数，
+	如果同时使用，如何解决名字冲突？
+	通过模块名引用函数名，因此不存在冲突：
+			import math, logging
+			print math.log(10)   # 调用的是math的log函数
+			logging.log(10, 'something')   # 调用的是logging的log函数
+
+
+	若用 from...import 导入 log 函数，势必引起冲突，可以给函数起个“别名”来避免冲突：
+			from math import log
+			from logging import log as logger   # logging的log现在变成了logger
+
+			print log(10)   # 调用的是math的log
+			logger(10, 'import from logging')   # 调用的是logging的log
+
+	练习：
+		Python的os.path模块提供了 isdir() 和 isfile()函数，请导入该模块，
+		并调用函数判断指定的目录和文件是否存在。
+	实现：
+		from os.path import isdir,isfile
+		print isdir(r'/data/webroot/resource/python')
+		print isfile(r'/data/webroot/resource/python/test.txt')
+
+
+	注意:
+	1. 由于运行环境是平台服务器，所以测试的也是服务器中的文件夹和文件，该服务器上
+	有/data/webroot/resource/python文件夹和/data/webroot/resource/python/test.txt文件，
+	大家可以测试下。
+
+	2. 当然，大家可以在本机上测试是否存在相应的文件夹和文件。
+			import os
+			print os.path.isdir(r'C:\Windows')
+			print os.path.isfile(r'C:\Windows\notepad.exe')
+
+3.3 动态导入模块
+	如果导入的模块不存在，Python解释器会报 ImportError 错误。
+
+	有的时候，两个不同的模块提供了相同的功能，比如 StringIO 和 cStringIO 都提供了StringIO这个功能。
+	这是因为Python是动态语言，解释执行，因此Python代码运行速度慢。
+	如果要提高Python代码的运行速度，最简单的方法是把某些关键函数用 C 语言重写，
+	这样就能大大提高执行速度。
+
+	同样的功能，StringIO 是纯Python代码编写的，而 cStringIO 部分函数是 C 写的，
+	因此 cStringIO 运行速度更快。
+
+
+	利用ImportError错误，我们经常在Python中动态导入模块：
+			try:
+			    from cStringIO import StringIO
+			except ImportError:
+			    from StringIO import StringIO
+
+	上述代码先尝试从cStringIO导入，如果失败了（比如cStringIO没有被安装），再尝试从StringIO导
+	入。这样，如果cStringIO模块存在，则我们将获得更快的运行速度，如果cStringIO不存在，则顶多
+	代码运行速度会变慢，但不会影响代码的正常执行。
+
+	try 的作用是捕获错误，并在捕获到指定错误时执行 except 语句。
+
+	练习：
+		利用import ... as ...，还可以动态导入不同名称的模块。
+		Python 2.6/2.7提供了json 模块，但Python 2.5以及更早版本没有json模块，
+		不过可以安装一个simplejson模块，这两个模块提供的函数签名和功能都一模一样。
+
+		试写出导入json 模块的代码，能在Python 2.5/2.6/2.7都正常运行。
+
+	实现：
+		try:
+		    import json
+		except ImportError:  # 注意异常类型
+		    import simplejson as json
+		print json.dumps({'python':2.7})
+
+
+3.4 使用 __future__
+	Python的新版本会引入新的功能，但是，实际上这些功能在上一个老版本中就已经存在了。
+	要“试用”某一新的特性，就可以通过导入__future__模块的某些功能来实现。
+
+	例如，Python 2.7的整数除法运算结果仍是整数：
+			>>> 10 / 3
+			3
+	但是，Python 3.x已经改进了整数的除法运算，“/”除将得到浮点数，“//”除才仍是整数：
+			>>> 10 / 3
+			3.3333333333333335
+			>>> 10 // 3
+			3
+
+	要在Python 2.7中引入3.x的除法规则，导入__future__的division：
+			>>> from __future__ import division
+			>>> print 10 / 3
+			3.3333333333333335
+
+	当新版本的一个特性与旧版本不兼容时，该特性将会在旧版本中添加到__future__中，
+	以便旧的代码能在旧版本中测试新特性。
+
+	练习：
+	在Python 3.x中，字符串统一为unicode，不需要加前缀 u，而以字节存储的str则必须加前缀 b。
+	请利用__future__的unicode_literals在Python 2.7中编写unicode字符串。
+
+	实现：
+		# from __future__ import literals
+		s = u'am I an unicode?'
+		print isinstance(s, unicode)
+
+
+3.5 安装第三方模块
+Python的模块：
+	-内置了许多有用的模块
+	-可以安装第三方模块
+
+Python提供的模块管理工具：
+	-easy_install
+	-pip（推荐，已内置到Python2.7.9）
+
+=======================================================
+
+第4章	面向对象编程基础
+
+4.1 面向对象编程
+4.2 定义类并创建实例
+4.3 创建实例属性
+4.4 初始化实例属性
+4.5 访问限制
+4.6 创建类属性
+4.7	类属性和实例属性名字冲突怎么办
+4.8 定义实例方法
+4.9 方法也是属性
+4.10 定义类方法
+
+4.1 面向对象编程
+什么是面向对象编程：
+	面向对象编程是一种程序设计范式
+	把程序看做不同对象的相互调用
+	对现实世界建立的对象模型
+面向对象编程的基本思想：
+	类和实例
+	类：用于定义抽象类型
+	实例：根据类的定义被创建出来
+
+	定义类：
+		class Person:
+			pass
+	创建对象：
+		Jack = Person()
+
+面向对象编程：数据封装
+	class Person:
+		def __init__(self, name):
+			self.name = name
+	p1 = Person('jack')
+	所有的对象都有相同的类型，但它们都有不同的数据
+
+4.2 定义类并创建实例
+	练习：
+		请练习定义Person类，并创建出两个实例，打印实例，再比较两个实例是否相等。
+
+	实现：
+		class Person(object):
+		    pass
+
+		xiaoming = Person()
+		xiaohong = Person()
+		print xiaoming
+		print xiaohong
+		print xiaoming == xiaohong
+
+4.3 创建实例属性
+	虽然可以通过Person类创建出xiaoming、xiaohong等实例，但是这些实例看上除了地址不同外，没有什么其他不同。在现实世界中，区分xiaoming、xiaohong要依靠他们各自的名字、性别、生日等属性。
+
+	如何让每个实例拥有各自不同的属性？由于Python是动态语言，对每一个实例，都可以直接给他们的属性赋值，例如，给xiaoming这个实例加上name、gender和birth属性：
+			xiaoming = Person()
+			xiaoming.name = 'Xiao Ming'
+			xiaoming.gender = 'Male'
+			xiaoming.birth = '1990-1-1'
+
+	给xiaohong加上的属性不一定要和xiaoming相同：
+			xiaohong = Person()
+			xiaohong.name = 'Xiao Hong'
+			xiaohong.school = 'No. 1 High School'
+			xiaohong.grade = 2
+
+	实例的属性可以像普通变量一样进行操作：xiaohong.grade = xiaohong.grade + 1
+
+
+	练习：
+		请创建包含两个 Person 类的实例的 list，并给两个实例的 name 赋值，
+		然后按照 name 进行排序。
+	实现：
+		class Person(object):
+		    pass
+
+		p1 = Person()
+		p1.name = 'Bart'
+
+		p2 = Person()
+		p2.name = 'Adam'
+
+		p3 = Person()
+		p3.name = 'Lisa'
+
+		L1 = [p1, p2, p3]
+		L2 = sorted(L1,key= lambda x : x.name)
+		# L2 = sorted(L1,lambda p1,p2:cmp(p1.name,p2.name))
+
+		print L2[0].name
+		print L2[1].name
+		print L2[2].name
+
+4.4 初始化实例属性
+	在定义 Person 类时，可以为Person类添加一个特殊的__init__()方法，当创建实例时，
+	__init__()方法被自动调用，我们就能在此为每个实例都统一加上以下属性：
+			class Person(object):
+			    def __init__(self, name, gender, birth):
+			        self.name = name
+			        self.gender = gender
+			        self.birth = birth
+	__init__() 方法的第一个参数必须是 self（也可以用别的名字，但建议使用习惯用法），
+	后续参数则可以自由指定，和定义函数没有任何区别。
+
+	相应地，创建实例时，就必须要提供除 self 以外的参数：
+			xiaoming = Person('Xiao Ming', 'Male', '1991-1-1')
+			xiaohong = Person('Xiao Hong', 'Female', '1992-2-2')
+
+	练习：
+		请定义Person类的__init__方法，除了接受 name、gender 和 birth 外，
+		还可接受任意关键字参数，并把他们都作为属性赋值给实例。
+
+	实现1：
+		class Person(object):
+		    def __init__(self, name, gender, birth, **kw):
+		        self.name = name
+		        self.gender = gender
+		        self.birth = birth
+		        self.__dict__.update(kw)
+
+		xiaoming = Person('Xiao Ming', 'Male', '1990-1-1', job='Student')
+		print xiaoming.name
+		print xiaoming.job
+
+	实现2：
+		class Person(object):
+		    def __init__(self,name,gender,birth,**argv):
+		        self.name = name
+		        self.gender = gender
+		        self.birth = birth
+		        for i in argv.keys():
+		            setattr(self,i,argv[i])
+
+		xiaoming = Person('Xiao Ming', 'Male', '1990-1-1', job='Student')
+
+		print xiaoming.name
+		print xiaoming.job
+
+4.5 访问限制
+	我们可以给一个实例绑定很多属性，如果有些属性不希望被外部访问到怎么办？
+	Python对属性权限的控制是通过属性名来实现的，如果一个属性由双下划线开头(__)，
+	该属性就无法被外部访问。
+
+	看例子：
+			class Person(object):
+			    def __init__(self, name):
+			        self.name = name
+			        self._title = 'Mr'
+			        self.__job = 'Student'
+			p = Person('Bob')
+			print p.name
+			# => Bob
+			print p._title
+			# => Mr
+			print p.__job
+			# => AttributeError
+
+	只有以双下划线开头的"__job"不能直接被外部访问。
+
+
+	但是，如果一个属性以"__xxx__"的形式定义，那它又可以被外部访问了，以"__xxx__"定义的属性
+	在Python的类中被称为特殊属性，有很多预定义的特殊属性可以使用，通常我们不要把普通属性用"
+	__xxx__"定义。
+
+	以单下划线开头的属性"_xxx"虽然也可以被外部访问，但是，按照习惯，他们不应该被外部访问。
+
+	练习：
+		请给Person类的__init__方法中添加name和score参数，并把score绑定到__score属性上，
+		看看外部是否能访问到。
+
+	实现：
+		class Person(object):
+		    def __init__(self, name, score):
+		        self.name = name
+		        self.__score = score
+
+		p = Person('Bob', 59)
+
+		print p.name
+		try:
+		    print p.__score
+		except AttributeError:
+		    print 'attributeerror'
+
+4.6 创建类属性
+	类是模板，而实例则是根据类创建的对象。
+
+	绑定在一个实例上的属性不会影响其他实例，但是，类本身也是一个对象，如果在类上绑定
+	一个属性，则所有实例都可以访问类的属性，并且，所有实例访问的类属性都是同一个！
+
+	也就是说，实例属性每个实例各自拥有，互相独立，而类属性有且只有一份。
+
+	定义类属性可以直接在 class 中定义：
+			class Person(object):
+			    address = 'Earth'
+			    def __init__(self, name):
+			        self.name = name
+
+	因为类属性是直接绑定在类上的，所以，访问类属性不需要创建实例，就可以直接访问：
+			print Person.address
+			# => Earth
+
+	对一个实例调用类的属性也是可以访问的，所有实例都可以访问到它所属的类的属性：
+			p1 = Person('Bob')
+			p2 = Person('Alice')
+			print p1.address
+			# => Earth
+			print p2.address
+			# => Earth
+
+	由于Python是动态语言，类属性也是可以动态添加和修改的：
+			Person.address = 'China'
+			print p1.address
+			# => 'China'
+			print p2.address
+			# => 'China'
+	因为类属性只有一份，所以，当Person类的address改变时，所有实例访问到的类属性都改变了。
+
+	练习：
+		请给 Person 类添加一个类属性 count，每创建一个实例，count 属性就加 1，
+		这样就可以统计出一共创建了多少个 Person 的实例。
+
+	实现：
+		class Person(object):
+		    count = 0
+		    def __init__(self,name):
+		        self.name = name
+		        Person.count += 1
+
+
+		p1 = Person('Bob')
+		print Person.count
+
+		p2 = Person('Alice')
+		print Person.count
+
+		p3 = Person('Tim')
+		print Person.count
+
+
+4.7	类属性和实例属性名字冲突怎么办
+	修改类属性会导致所有实例访问到的类属性全部都受影响，但是，如果在实例变量上修改类属性
+	会发生什么问题呢？
+			class Person(object):
+			    address = 'Earth'
+			    def __init__(self, name):
+			        self.name = name
+
+			p1 = Person('Bob')
+			p2 = Person('Alice')
+
+			print 'Person.address = ' + Person.address
+
+			p1.address = 'China'
+			print 'p1.address = ' + p1.address
+
+			print 'Person.address = ' + Person.address
+			print 'p2.address = ' + p2.address
+
+			结果如下：
+			Person.address = Earth
+			p1.address = China
+			Person.address = Earth
+			p2.address = Earth
+
+	我们发现，在设置了 p1.address = 'China' 后，p1访问 address 确实变成了 'China'，但是，Person.address和p2.address仍然是'Earch'，怎么回事？
+
+	原因是 p1.address = 'China'并没有改变 Person 的 address，而是给 p1这个实例
+	绑定了实例属性address ，对p1来说，它有一个实例属性address（值是'China'），
+	而它所属的类Person也有一个类属性address，所以:
+
+	访问 p1.address 时，优先查找实例属性，返回'China'。
+	访问 p2.address 时，p2没有实例属性address，但是有类属性address，因此返回'Earth'。
+
+
+	可见，当实例属性和类属性重名时，实例属性优先级高，它将屏蔽掉对类属性的访问。
+
+	当我们把 p1 的 address 实例属性删除后，访问 p1.address 就又返回类属性的值 'Earth'了：
+			del p1.address
+			print p1.address
+			# => Earth
+	注意：
+	千万不要在实例上修改类属性，它实际上并没有修改类属性，而是给实例绑定了一个实例属性。
+
+	练习：
+		若把Person的属性count更改为__count私有属性，则在类外实例和类均不可以访问__count类属性，否则会报AttributeError异常。
+
+4.8 定义实例方法
+	实例的方法就是在类中定义的函数，它的第一个参数永远是 self，
+	指向调用该方法的实例本身，其他参数和一个普通函数是完全一样的：
+
+	class Person(object):
+
+	    def __init__(self, name):
+	        self.__name = name
+
+	    def get_name(self):
+	        return self.__name
+
+	通过这些公有的实例方法可以访问私有属性。
+
+4.9 方法也是属性
+	我们在 class 中定义的实例方法其实也是属性，它实际上是一个函数对象：
+			class Person(object):
+			    def __init__(self, name, score):
+			        self.name = name
+			        self.score = score
+			    def get_grade(self):
+			        return 'A'
+
+			p1 = Person('Bob', 90)
+			print p1.get_grade
+			# => <bound method Person.get_grade of <__main__.Person object at 0x109e58510>>
+			print p1.get_grade()
+			# => A
+
+	也就是说，p1.get_grade 返回的是一个函数对象，但这个函数是一个绑定到实例的函数，
+	p1.get_grade() 才是方法调用。
+
+	因为方法也是一个属性，所以，它也可以动态地添加到实例上，只是需要用 types.MethodType()
+	把一个函数变为一个方法：
+
+			import types
+			def fn_get_grade(self):
+			    if self.score >= 80:
+			        return 'A'
+			    if self.score >= 60:
+			        return 'B'
+			    return 'C'
+
+			class Person(object):
+			    def __init__(self, name, score):
+			        self.name = name
+			        self.score = score
+
+			p1 = Person('Bob', 90)
+
+			p1.get_grade = types.MethodType(fn_get_grade, p1, Person)
+
+			print p1.get_grade()
+			# => A
+			p2 = Person('Alice', 65)
+			print p2.get_grade()
+			# ERROR: AttributeError: 'Person' object has no attribute 'get_grade'
+			# 因为p2实例并没有绑定get_grade
+	给一个实例动态添加方法并不常见，直接在class中定义要更直观。
+
+4.10 定义类方法
+	和属性类似，方法也分实例方法和类方法。
+
+	在class中定义的全部是实例方法，实例方法第一个参数 self 是实例本身。
+	要在class中定义类方法，需要在方法上添加@classmethod：
+			class Person(object):
+			    __count = 0
+			    # 私有的类变量，在类之外不可以直接访问，需要对外提供一个公共方法
+			    @classmethod
+			    def how_many(cls):
+			        return cls.__count
+			    def __init__(self, name):
+			        self.name = name
+			        Person.__count = Person.__count + 1
+
+			print Person.how_many()
+			p1 = Person('Bob')
+			print Person.how_many()
+
+	通过标记一个 @classmethod，该方法将绑定到 Person 类上，而非类的实例。
+	类方法的第一个参数将传入类本身，通常将参数名命名为 cls，上面的 cls.count 实际上相当于
+	Person.count。
+
+	因为是在类上调用，而非实例上调用，因此类方法无法获得任何实例变量，只能获得类的引用。
+
+=======================================================
+
+第5章	类的继承
+5.1 什么是继承
+5.2 继承一个类
+5.3 判断类型
+5.4 多态
+5.5 多重继承
+5.6 获取对象信息
+
+5.1 什么是继承
+	如果要编写一个新类：Student
+	需要的属性有：name、gender、school、score
+	已有的Person类：
+		class Person(object):
+			def __init__(self, name, gender):
+				self.name = name
+				self.gender = gender
+	那么定义Student是否可以利用Person的方法和属性呢？
+		class Student(Person):
+			def __init__(self, name, gender, school, score):
+				super(Student, self).__init__(name, gender)
+				self.school = school
+				self.score = score
+	什么是继承：
+		新类不必从头编写
+		新类从现有的类继承，就自动拥有了现有类的所有功能
+		新类只需要编写现有类缺少的新功能
+
+	继承的好处：
+		复用已有代码
+		自动拥有了现有类的所有功能
+		只需要编写缺少的新功能
+
+	父类和子类：
+		Person----父类，基类，超类
+		Student---子类，派生类，继承类
+
+	继承树：
+	继承的特点：
+		子类和父类是is关系
+		class Student(person)：
+			pass
+		p = Person()  # p是一个Person，不能说是一个Student
+		s = Student() # s是一个Student，也是一个Person
+
+	has关系应该使用组合而非继承：
+		Student和Book类是has关系：
+		class Student(Person):
+			def __init__(self, bookName):
+				self.book = Book(bookName)
+
+	Python的继承：
+		总是从某个类继承：
+			class MyClass(object):
+				pass
+		不要忘记调用super().__init__
+			def __init__(self, args):
+				super(SubClass,self).__init__(args)  # 用来初始化父类
+				pass
+
+5.2 继承一个类
+	函数super(Student, self)将返回当前类继承的父类，即 Person ，然后调用__init__()方法，
+	注意self参数已在super()中传入，在__init__()中将隐式传递，不需要写出（也不能写）。
+
+			class Person(object):
+			    def __init__(self, name, gender):
+			        self.name = name
+			        self.gender = gender
+			定义Student类时，只需要把额外的属性加上，例如score：
+
+			class Student(Person):
+			    def __init__(self, name, gender, score):
+			        super(Student, self).__init__(name, gender)
+			        self.score = score
+
+5.3 判断类型
+	函数isinstance()可以判断一个变量的类型，既可以用在Python内置的数据类型
+	如str、list、dict，也可以用在我们自定义的类，它们本质上都是数据类型。
+			>>> isinstance(student, Person)
+			True    # student是Person类型
+
+5.4 多态
+	类具有继承关系，并且子类类型可以向上转型看做父类类型，如果从 Person 派生出 Student ，
+	并都写了一个 whoAmI() 方法：
+			class Person(object):
+			    def __init__(self, name, gender):
+			        self.name = name
+			        self.gender = gender
+			    def whoAmI(self):
+			        return 'I am a Person, my name is %s' % self.name
+
+			class Student(Person):
+			    def __init__(self, name, gender, score):
+			        super(Student, self).__init__(name, gender)
+			        self.score = score
+			    def whoAmI(self):
+			        return 'I am a Student, my name is %s' % self.name
+
+	在一个函数中，如果我们接收一个变量 x，则无论该 x 是 Person、Student
+	都可以正确打印出结果：
+
+			def who_am_i(x):
+			    print x.whoAmI()
+
+			p = Person('Tim', 'Male')
+			s = Student('Bob', 'Male', 88)
+
+			who_am_i(p)
+			who_am_i(s)
+			运行结果：
+			I am a Person, my name is Tim
+			I am a Student, my name is Bob
+
+	这种行为称为多态。也就是说，方法调用将作用在 x 的实际类型上。s 是Student类型，
+	它实际上拥有自己的 whoAmI()方法以及从 Person继承的 whoAmI方法，但调用 s.whoAmI()
+	总是先查找它自身的定义，如果没有定义，则顺着继承链向上查找，直到在某个父类中找到为止。
+
+	由于Python是动态语言，所以，传递给函数 who_am_i(x)的参数 x 不一定是 Person 或 Person
+	的子类型。任何数据类型的实例都可以，只要它有一个whoAmI()的方法即可：
+			class Book(object):
+			    def whoAmI(self):
+			        return 'I am a book'
+	这是动态语言和静态语言（例如Java）最大的差别之一。动态语言调用实例方法，不检查类型，
+	只要方法存在，参数正确，就可以调用。
+
+	练习：
+		Python提供了open()函数来打开一个磁盘文件，并返回 File 对象。File对象有
+		一个read()方法可以读取文件内容：
+
+		例如，从文件读取内容并解析为JSON结果：
+				import json
+				f = open('/path/to/file.json', 'r')
+				print json.load(f)
+
+		由于Python的动态特性，json.load()并不一定要从一个File对象读取内容。
+		任何对象，只要有read()方法，就称为File-like Object，都可以传给json.load()。
+
+		请尝试编写一个File-like Object，把一个字符串 r'["Tim", "Bob", "Alice"]'包装成
+		File-like Object 并由 json.load() 解析。
+
+	实现：
+		import json
+		class Students(object):
+		    def read(self):
+		        return r'["Tim", "Bob", "Alice"]'
+
+		s = Students()
+		print json.load(s)
+
+5.5 多重继承
+	除了从一个父类继承外，Python允许从多个父类继承，称为多重继承。
+	多重继承的继承链就不是一棵树了。
+
+	多重继承的目的是从两种继承树中分别选择并继承出子类，以便组合功能使用。
+
+	举个例子，Python的网络服务器有TCPServer、UDPServer、UnixStreamServer、
+	UnixDatagramServer，而服务器运行模式有 多进程ForkingMixin 和 多线程ThreadingMixin两种。
+
+	要创建多进程模式的 TCPServer：
+		class MyTCPServer(TCPServer, ForkingMixin)
+		    pass
+
+	要创建多线程模式的 UDPServer：
+		class MyUDPServer(UDPServer, ThreadingMixin):
+		    pass
+	如果没有多重继承，要实现上述所有可能的组合需要 4x2=8 个子类。
+
+	练习：
+		+-Person
+		  +- Student
+		  +- Teacher
+		是一类继承树；
+
+		+- SkillMixin
+		   +- BasketballMixin
+		   +- FootballMixin
+		是一类继承树。
+
+		通过多重继承，请定义“会打篮球的学生”和“会踢足球的老师”。
+
+	实现：
+		class Person(object):
+		    pass
+
+		class Student(Person):
+		    pass
+
+		class Teacher(Person):
+		    pass
+
+		class SkillMixin(object):
+		    pass
+
+		class BasketballMixin(SkillMixin):
+		    def skill(self):
+		        return 'basketball'
+
+		class FootballMixin(SkillMixin):
+		    def skill(self):
+		        return 'football'
+
+		class BStudent(Student,BasketballMixin):
+		    pass
+
+		class FTeacher(Teacher,FootballMixin):
+		    pass
+
+		s = BStudent()
+		print s.skill()
+
+		t = FTeacher()
+		print t.skill()
+
+5.6 获取对象信息
+	拿到一个变量，除了用 isinstance() 判断它是否是某种类型的实例。
+
+	type() 函数获取变量的类型，它返回一个 Type 对象：
+			>>> type(123)
+			<type 'int'>
+			>>> s = Student('Bob', 'Male', 88)
+			>>> type(s)
+			<class '__main__.Student'>
+
+
+	dir() 函数获取变量的所有属性：
+			>>> dir(123)   # 整数也有很多属性...
+			['__abs__', '__add__', '__and__', '__class__', '__cmp__', ...]
+
+			>>> dir(s)
+			['__class__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'gender', 'name', 'score', 'whoAmI']
+
+	对于实例变量，dir()返回所有实例属性，包括`__class__`这类有特殊意义的属性。
+	注意到方法`whoAmI`也是 s 的一个属性。
+	如何去掉`__xxx__`这类的特殊属性，只保留我们自己定义的属性？回顾一下filter()函数的用法。
+
+
+	dir()返回的属性是字符串列表，如果已知一个属性名称，要获取或者设置对象的属性，就需要用 getattr() 和 setattr( )函数了：
+
+			>>> getattr(s, 'name')  # 获取name属性
+			'Bob'
+			>>> setattr(s, 'name', 'Adam')  # 设置新的name属性
+			>>> s.name
+			'Adam'
+
+			>>> getattr(s, 'age')  # 获取age属性，但是属性不存在，报错：
+			AttributeError: 'Student' object has no attribute 'age'
+			>>> getattr(s, 'age', 20)  # 获取age属性，如果属性不存在，就返回默认值20：
+			20
+
+	练习：
+		对于Person类的定义：
+				class Person(object):
+				    def __init__(self, name, gender):
+				        self.name = name
+				        self.gender = gender
+		希望除了 name和gender 外，可以提供任意额外的关键字参数，并绑定到实例，请修改 Person 的 __init__()定 义，完成该功能。
+
+	实现：
+		class Person(object):
+
+		    def __init__(self, name, gender, **kw):
+		        self.name = name
+		        self.gender = gender
+
+		        #self.__dict__.update(kw)
+
+		        for k, v in kw.iteritems():
+		            setattr(self, k, v)
+
+		p = Person('Bob', 'Male', age=18, course='Python')
+		print p.age
+		print p.course
+		print filter(lambda x: x[0]!='_', dir(p))
+
+================================================================
+
+第6章	定制类
+6.1 什么是特殊方法
+6.2 __str__和__repr__
+6.3 __cmp__
+6.4 __len__
+6.5 数学运算
+6.6 类型转换
+6.7 @property
+6.8 __slots__
+6.9 __call__
+
+6.1 什么是特殊方法
+	比较print的结果：
+	    >>> a_list = ['1,2,3']
+	    >>> s = Student()
+
+		>>> print a_list
+		['1,2,3']
+		>>> print s
+		<__main__.Student instance at 0x0230F120>
+	Python如何把任意变量变成str？
+		因为任何数据类型的实例都有一个特殊方法 __str__()
+		打印实例就是打印这个实例__str__()特殊方法返回的结果
+		>>> print a_list  #  print a_list.__str__()
+		>>> print s 	  #  print s.__str__()
+
+		覆写__str__()方法
+
+	Python的特殊方法：
+		__str__():用于print函数
+		__len__():用于len函数
+		__cmp__():用于cmp函数
+		......
+
+	Python的特殊方法的特点：
+		特殊方法定义在class中
+		不需要直接调用
+		Python的某些函数或操作符会调用对应的特殊方法
+
+	正确实现特殊方法：
+		只需要编写用到的特殊方法
+		有关联性的特殊方法都必须实现
+			比如：
+				__getattr__
+				__setattr__
+				__delattr__
+
+6.2 __str__和__repr__
+	如果要把一个类的实例变成 str，就需要实现特殊方法__str__()：
+			class Person(object):
+			    def __init__(self, name, gender):
+			        self.name = name
+			        self.gender = gender
+			    def __str__(self):
+			        return '(Person: %s, %s)' % (self.name, self.gender)
+
+				在交互式命令行下用 print 试试：
+				>>> p = Person('Bob', 'male')
+				>>> print p
+				(Person: Bob, male)
+
+				但是，如果直接敲变量 p，__str__() 不会被调用。
+				>>> p
+				<main.Person object at 0x10c941890>
+
+
+	因为 Python 定义了__str__()和__repr__()两种方法，__str__()用于显示给用户，
+	而__repr__()用于显示给开发人员。
+	有一个偷懒的定义__repr__的方法，直接把__str__赋值给__repr__即可
+
+			class Person(object):
+			    def __init__(self, name, gender):
+			        self.name = name
+			        self.gender = gender
+			    def __str__(self):
+			        return '(Person: %s, %s)' % (self.name, self.gender)
+			    __repr__ = __str__
+
+6.3 __cmp__
+	对 int、str 等内置数据类型排序时，Python的 sorted() 按照默认的比较函数 cmp 排序，
+	但是，如果对一组 Student 类的实例排序时，就必须提供我们自己的特殊方法 __cmp__()。
+
+	如果list不仅仅包含 Student 类，则 __cmp__ 可能会报错。
+
+	练习：
+		请修改 Student 的 __cmp__ 方法，让它按照分数从高到底排序，分数相同的按名字排序。
+	实现：
+		class Student(object):
+		    def __init__(self, name, score):
+		        self.name = name
+		        self.score = score
+
+		    def __str__(self):
+		        return '(%s: %s)' % (self.name, self.score)
+
+		    __repr__ = __str__
+
+		    def __cmp__(self, s):
+		        #if cmp(self.score, s.score) == 0
+		        #   return cmp(self.name, s.name)
+		        #else:
+		        #   return -cmp(self.score,s.score)
+		        # 如果list不仅仅包含 Student 类，则 __cmp__ 可能会报错
+		        if False == isinstance(s, Student):
+		            return -1
+		        return -cmp(self.score, s.score) or cmp(self.name, s.name)
+
+		L = [Student('Tim', 99), Student('Bob', 88), Student('Alice', 99)]
+		print sorted(L)
+
+6.4 __len__
+	如果一个类表现得像一个list，要获取有多少个元素，就得用 len() 函数。
+	要让 len() 函数工作正常，类必须提供一个特殊方法__len__()，它返回元素的个数。
+
+	例如，我们写一个 Students 类，把名字传进去：
+			class Students(object):
+			    def __init__(self, *args):
+			        self.names = args
+			    def __len__(self):
+			        return len(self.names)
+
+	只要正确实现了__len__()方法，就可以用len()函数返回Students实例的“长度”：
+			>>> ss = Students('Bob', 'Alice', 'Tim')
+			>>> print len(ss)
+			3
+
+6.5 数学运算
+	Python 提供的基本数据类型 int、float 可以做整数和浮点的四则运算以及乘方等运算。
+	但是，四则运算不局限于int和float，还可以是有理数、矩阵等。
+
+	要表示有理数，可以用一个Rational类来表示：
+			class Rational(object):
+			    def __init__(self, p, q):
+			        self.p = p
+			        self.q = q
+	p、q 都是整数，表示有理数 p/q。
+
+	如果要让Rational进行+运算，需要正确实现__add__：
+			class Rational(object):
+			    def __init__(self, p, q):
+			        self.p = p
+			        self.q = q
+			    def __add__(self, r):
+			        return Rational(self.p * r.q + self.q * r.p, self.q * r.q)
+			    def __str__(self):
+			        return '%s/%s' % (self.p, self.q)
+			    __repr__ = __str__
+
+	现在可以试试有理数加法：
+			>>> r1 = Rational(1, 3)
+			>>> r2 = Rational(1, 2)
+			>>> print r1 + r2
+			5/6
+
+	练习：
+		实现Rational类可以做加法、做减法、乘方和除法四则运算。
+		提示：
+		加法运算：__add__
+		减法运算：__sub__
+		乘法运算：__mul__
+		除法运算：__div__
+
+			# 求两个整数的最大公约数，用于分数约分
+			def max_div(m,n):
+		    if m < n:
+		        m,n = n,m
+		    while(n != 0):
+		        r = m % n
+		        m = n
+		        n = r
+		    return m
+
+			class Rational(object):
+			    def __init__(self, p, q):
+			        self.p = p
+			        self.q = q
+
+			    def __add__(self, r):
+			        return Rational(self.p * r.q + self.q * r.p, self.q * r.q)
+
+			    def __sub__(self, r):
+			        return Rational(self.p * r.q - r.p * self.q, self.q * r.q)
+
+			    def __mul__(self, r):
+			        return Rational(self.p * r.p, self.q * r.q)
+
+			    def __div__(self, r):
+			        return Rational(self.p * r.q, self.q * r.p)
+
+			    def __str__(self):
+			        return '%s/%s' %(self.p/max_div(self.p,self.q), self.q/max_div(self.p,self.q))
+
+			    __repr__ = __str__
+
+			r1 = Rational(1, 2)
+			r2 = Rational(1, 4)
+			print r1 + r2
+			print r1 - r2
+			print r1 * r2
+			print r1 / r2
+
+6.6 类型转换
+	自定义类Rational实现了有理数运算，但是，如果要把结果转为 int 或 float 怎么办？
+
+	考察整数和浮点数的转换：
+			>>> int(12.34)
+			12
+			>>> float(12)
+			12.0
+
+	如果要把 Rational 转为 int，应该使用：
+			r = Rational(12, 5)
+			n = int(r)
+	要让int()函数正常工作，只需要实现特殊方法__int__():
+			class Rational(object):
+			    def __init__(self, p, q):
+			        self.p = p
+			        self.q = q
+			    def __int__(self):
+			        return self.p // self.q
+			结果如下：
+
+			>>> print int(Rational(7, 2))
+			3
+			>>> print int(Rational(1, 3))
+			0
+
+	同理，要让float()函数正常工作，只需要实现特殊方法__float__()。
+
+			class Rational(object):
+			    def __init__(self, p, q):
+			        self.p = p
+			        self.q = q
+
+			    def __int__(self):
+			        return self.p // self.q
+
+			    def __float__(self):
+			        return self.p * 1.0 / self.q
+
+			print float(Rational(7, 2))
+			print float(Rational(1, 3))
+
+
+6.7 @property
+	方法当“属性”访问。
+
+	考察 Student 类：
+			class Student(object):
+			    def __init__(self, name, score):
+			        self.name = name
+			        self.score = score
+	当我们想要修改一个 Student 的 scroe 属性时，可以这么写：
+			s = Student('Bob', 59)
+			s.score = 60
+	但是也可以这么写：
+			s.score = 1000
+	显然，直接给属性赋值无法检查分数的有效性。
+
+
+	如果利用两个方法：
+			class Student(object):
+			    def __init__(self, name, score):
+			        self.name = name
+			        self.__score = score
+			    def get_score(self):
+			        return self.__score
+			    def set_score(self, score):
+			        if score < 0 or score > 100:
+			            raise ValueError('invalid score')
+			        self.__score = score
+
+	这样一来，s.set_score(1000) 就会报错。
+
+	这种使用 get/set 方法来封装对一个属性的访问在许多面向对象编程的语言中都很常见。
+	但是写 s.get_score() 和 s.set_score() 没有直接写 s.score 来得直接。
+
+
+	有没有两全其美的方法？----有。
+	因为Python支持高阶函数，在函数式编程中我们介绍了装饰器函数，可以用装饰器函数把
+	get/set 方法“装饰”成属性调用：
+			class Student(object):
+			    def __init__(self, name, score):
+			        self.name = name
+			        self.__score = score
+			    @property
+			    def score(self):
+			        return self.__score
+			    @score.setter
+			    def score(self, score):
+			        if score < 0 or score > 100:
+			            raise ValueError('invalid score')
+			        self.__score = score
+
+	注意:
+		第一个score(self)是get方法，用@property装饰，第二个score(self, score)
+		是set方法，用@score.setter装饰，@score.setter是前一个@property装饰后的副产品。
+
+	现在，就可以像使用属性一样设置score了：
+			>>> s = Student('Bob', 59)
+			>>> s.score = 60
+			>>> print s.score
+			60
+			>>> s.score = 1000
+			Traceback (most recent call last):
+			  ...
+			ValueError: invalid score
+	说明对 score 赋值实际调用的是 set方法。
+
+	练习：
+		如果没有定义set方法，就不能对“属性”赋值，这时，就可以创建一个只读“属性”。
+		请给Student类加一个grade属性，根据 score 计算 A（>=80）、B、C（<60）。
+	实现：
+		class Student(object):
+		    def __init__(self, name, score):
+		        self.name = name
+		        self.__score = score
+
+		    @property
+		    def score(self):
+		        return self.__score
+
+		    @score.setter   # 可以以属性的形式调用这个方法
+		    def score(self, score):
+		        if score < 0 or score > 100:
+		            raise ValueError('invalid score')
+		        self.__score = score
+
+		    @property
+		    def grade(self):
+		        if self.score > 80:
+		            return 'A'
+		        elif self.score >= 60:
+		            return 'B'
+		        else :
+		            return 'C'
+
+		s = Student('Bob', 59)
+		print s.grade
+
+		s.score = 60
+		print s.grade
+
+		s.score = 99
+		print s.grade
+
+6.8 __slots__
+	由于Python是动态语言，任何实例在运行期都可以动态地添加属性。
+
+	如果要限制添加的属性，例如，Student类只允许添加 name、gender和score 这3个属性，
+	就可以利用Python的一个特殊的__slots__来实现。
+
+	顾名思义，__slots__是指一个类允许的属性列表：
+			class Student(object):
+			    __slots__ = ('name', 'gender', 'score')
+			    def __init__(self, name, gender, score):
+			        self.name = name
+			        self.gender = gender
+			        self.score = score
+
+	现在，对实例进行操作：
+			>>> s = Student('Bob', 'male', 59)
+			>>> s.name = 'Tim' # OK
+			>>> s.score = 99 # OK
+			>>> s.grade = 'A'
+			Traceback (most recent call last):
+			  ...
+			AttributeError: 'Student' object has no attribute 'grade'
+
+	__slots__的目的是限制当前类所能拥有的属性，如果不需要添加任意动态的属性，
+	使用__slots__也能节省内存。
+
+	练习：
+		假设Person类通过__slots__定义了name和gender，请在派生类Student中通过__slots__继续
+		添加score的定义，使Student类可以实现name、gender和score 3个属性。
+
+	实现：
+		class Person(object):
+		    __slots__ = ('name', 'gender')
+
+		    def __init__(self, name, gender):
+		        self.name = name
+		        self.gender = gender
+
+		class Student(Person):
+		    __slots__ = ('score')
+
+		    def __init__(self, name, gender, score):
+		        super(Student,self).__init__(name,gender)
+		        self.score = score
+
+		s = Student('Bob', 'male', 59)
+		s.name = 'Tim'
+		s.score = 99
+		print s.score
+
+6.9 __call__
+	在Python中，函数其实是一个对象：
+			>>> f = abs
+			>>> f.__name__
+			'abs'
+			>>> f(-123)
+			123
+
+	由于 f 可以被调用，所以，f 被称为可调用对象。
+
+	所有的函数都是可调用对象。
+	一个类实例也可以变成一个可调用对象，只需要实现一个特殊方法__call__()。
+
+	我们把 Person 类变成一个可调用对象：
+			class Person(object):
+			    def __init__(self, name, gender):
+			        self.name = name
+			        self.gender = gender
+
+			    def __call__(self, friend):
+			        print 'My name is %s...' % self.name
+			        print 'My friend is %s...' % friend
+
+	现在可以对 Person 实例直接调用：
+			>>> p = Person('Bob', 'male')
+			>>> p('Tim')
+			My name is Bob...
+			My friend is Tim...
+
+	单看 p('Tim') 你无法确定 p 是一个函数还是一个类实例，
+	所以，在Python中，函数也是对象，对象和函数的区别并不显著。
+
+	练习：
+		改进一下前面定义的斐波那契数列：
+
+			class Fib(object):
+			    ???
+			请加一个__call__方法，让调用更简单：
+
+			>>> f = Fib()
+			>>> print f(10)
+			[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+	实现：
+		class Fib(object):
+		    def __call__(self,num):
+		        L = [0,1]
+		        i = 2
+		        while i < num:
+		            L.append(L[i-2]+L[i-1])
+		            i=i+1
+		        return L
+
+		f = Fib()
+		print f(10)
+
+===============================================================
+
+第7章	课程总结
+
+内容回顾：
+Python的函数式编程：
+	高阶函数
+	闭包
+	匿名函数
+	装饰器
+
+Python的模块和包
+	避免名字冲突
+	引用模块
+	__future__
+
+Python的面向对象编程：
+	类和实例
+	属性和方法
+		可以把属性看成方法，绑定到实例的函数对象
+	区分类属性和实例属性
+
+类的继承：
+	继承的概念和目的
+	多态
+	多重继承
+
+定制类：
+	定制类的目的
+		自己编写的类应用到普通的函数中，像len函数
+	特殊方法
+	类型装换
+	__call__
+
+
+下一步可以继续学习
+	IO：文件和Socket
+	多任务：进程和线程
+	数据库
+	Web开发
+
+
+
+
+
+
+
+
+
+
+
+
+

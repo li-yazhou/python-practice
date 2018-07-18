@@ -8,4 +8,4 @@ class User(object):
 
 if __name__ == '__main__':
     user = User('10001','zhouzhou')
-    print user
+    print(user)

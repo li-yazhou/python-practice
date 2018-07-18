@@ -47,25 +47,3 @@ class Mytimer(object):
             if result[index]:
                 prompt += (str(result[index]) + str(self.unit[index]))
         return prompt
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
