@@ -1,10 +1,9 @@
+import requests as req
 
 
 def simple():
     names = ["xxx", "yyy"]
     print(names)
-
-
 
 
 if __name__ == '__main__':
