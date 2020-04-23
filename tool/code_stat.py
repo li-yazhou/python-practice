@@ -8,8 +8,8 @@ import re
 # filepath = '/Users/liyazhou1/self-repo/python-practice/tool/code_stat.py'
 # desttype = 'python'
 
-basedir = '/Users/liyazhou1/self-repo/python-practice'
-desttype = 'python'
+basedir = '/Users/liyazhou/Repo/open-repo/kafka'
+desttype = 'java'
 
 
 file_types = {'java':['.java', '.scala'], 'python': ['.py']}
