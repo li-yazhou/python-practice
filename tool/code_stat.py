@@ -8,7 +8,7 @@ import re
 # filepath = '/Users/liyazhou1/self-repo/python-practice/tool/code_stat.py'
 # desttype = 'python'
 
-basedir = '/Users/liyazhou/Repo/open-repo/kafka'
+basedir = '/Users/liyazhou1/open-repo/kafka'
 desttype = 'java'
 
 
@@ -18,7 +18,7 @@ re_java_comment = re.compile('[(//)(/*)(*)(*/)]')
 comment_types = {'java': re_java_comment, 'python': re_py_comment}
 
 file_nums = 0
-max_file = ''
+max_file = ['', (True, 0, 0, 0, 0)]
 filepath_list = []
 
 total_lines = 0
@@ -60,6 +60,13 @@ def stat_file(filepath):
                 else:
                     file_code_lines += 1
     result = (True, file_lines, file_code_lines, file_comment_lines, file_blank_lines)
+
+    global max_file
+    curr_max_file_args = max_file[1]
+    code_and_comment_lines = curr_max_file_args[2] + curr_max_file_args[3]
+    if code_and_comment_lines < file_code_lines + file_comment_lines:
+        max_file = [filepath, result]
+
     global filepath_list
     filepath_list.append({filepath: result})
     return result
@@ -88,6 +95,7 @@ def dir_stat_result():
     print("code lines: ", code_lines)
     print("comment lines: ", comment_lines)
     print("blank lines: ", blank_lines)
+    print("max file lines: ", max_file)
 
 
 def file_stat_result(result_tuple):
@@ -95,6 +103,7 @@ def file_stat_result(result_tuple):
     print("code lines: ", result_tuple[2])
     print("comment lines: ", result_tuple[3])
     print("blank lines: ", result_tuple[4])
+    print("max file lines: ", max_file)
 
 
 def stat_one_dir(basedir):
