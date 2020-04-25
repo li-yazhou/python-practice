@@ -79,11 +79,11 @@ def stat_dir(basedir):
 
 
 def dir_stat_result():
-    print("total file num: ", file_nums)
     print("file list: ")
     for result in filepath_list:
         for filepath, filestat in result.items():
             print(filepath, ',', filestat, end='\n')
+    print("total file num: ", file_nums)
     print("total lines: ", total_lines)
     print("code lines: ", code_lines)
     print("comment lines: ", comment_lines)
