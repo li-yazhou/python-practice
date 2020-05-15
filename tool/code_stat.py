@@ -8,7 +8,9 @@ import re
 # filepath = '/Users/liyazhou1/self-repo/python-practice/tool/code_stat.py'
 # desttype = 'python'
 
-basedir = '/Users/liyazhou/Repo/open-repo/kafka'
+# basedir = '/Users/liyazhou/Repo/open-repo/kafka'
+basedir = '/Users/liyazhou/Repo/open-repo/_kafka/kafka-2.5.0'
+basedir = '/Users/liyazhou/Repo/open-repo/_rpc/dubbo'
 desttype = 'java'
 
 
@@ -34,7 +36,10 @@ def is_python_file(filename):
 def check_file(filepath):
     valid_types = file_types[desttype]
     for valid_type in valid_types:
-        if os.path.splitext(filepath)[1] == valid_type:
+        # if os.path.splitext(filepath)[1] == valid_type:
+        name_postfix = os.path.splitext(filepath)
+        if name_postfix[1] == valid_type and not name_postfix[0].endswith('Test'):
+        # if name_postfix[1] == valid_type and name_postfix[0].endswith('Test'):
             global file_nums
             file_nums += 1
             return True
