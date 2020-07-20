@@ -1,0 +1,13 @@
+ {
+    "totalProperty":2,
+    "dataList":[{
+        "id":"20160",
+        "memory":"20",
+        "cpu":"10"
+    },
+    {
+        "id":"25452",
+        "memory":"4336",
+        "cpu":"1088"
+    }]
+}
