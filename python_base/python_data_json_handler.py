@@ -1,6 +1,6 @@
 import json
 
-read_file = "../data/data.json"
+read_file = "data.json"
 write_file = "../data/data_bak.json"
 
 

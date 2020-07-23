@@ -2,6 +2,7 @@
 import os
 import shutil
 
+
 def batch_move(path):
     for foldername in os.listdir(path):
         path_01 = os.path.join(path, foldername)    # child file(dir)
@@ -28,13 +29,12 @@ def batch_rename(path):
     for filename in os.listdir(path):
         if os.path.isfile(os.path.join(path,filename)):
             if filename.find('.') > 0:
-                new_filename = filename.replace("黑马程序员_张孝祥_Java基础加强_",'')
+                new_filename = filename.replace("xxxxx",'')
                 os.rename(os.path.join(path,filename), os.path.join(path, new_filename))
-        
 
 
 if __name__ == '__main__':
-    path = r"F:\Computer\Java\JavaSeries\JavaSE\java强化--张孝祥\javaHence-Video"
+    path = r"/path"
     # batch_move(path)
     # batch_remove(path)
     batch_rename(path)

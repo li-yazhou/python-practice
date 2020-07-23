@@ -16,12 +16,11 @@ def batch_rename_foldername(path):
             os.rename(os.path.join(path,foldername),os.path.join(path, new_foldername))
 
 
-# 给小米锁屏画报无后缀名文件添加上后缀
 def batch_rename_image(path):
     for filename in os.listdir(path):
         if os.path.isfile(os.path.join(path,filename)):
-            if filename.find('.') == -1:
-            	new_filename = filename + ".jpg"
+            if filename.find('.') != -1:
+            	new_filename = "python_lang_" + filename
             	os.rename(os.path.join(path,filename), os.path.join(path, new_filename))
 
 def batch_rename_image_02(path):
@@ -33,8 +32,8 @@ def batch_rename_image_02(path):
             	os.rename(os.path.join(path,filename), os.path.join(path, new_filename))
 
 if __name__ == '__main__':
-	path = r"F:\Graduate\MobilePhone\BGimages_Primitive"
-	batch_rename_image_02(path)
+	path = r"/Users/liyazhou/Repo/self-repo/python-practice/python_base/lang"
+	batch_rename_image(path)
 
 	# path = r"F:\Graduate\MobilePhone\BGimages"
 	# batch_rename_image(path)
