@@ -1,6 +1,0 @@
-start.py  end
-start.java  end
-start.c end
-C
-Java 
-Python
