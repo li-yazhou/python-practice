@@ -1,0 +1,2526 @@
+=======================================================
+中文乱码问题：
+# -*- coding: utf-8 -*-
+
+
+函数
+	def my_abs(x):
+	    if not isinstance(x, (int, float)):
+	        raise TypeError('bad operand type')
+	    if x >= 0:
+	        return x
+	    else:
+	        return -x
+
+
+可变参数
+	>>> nums = [1, 2, 3]
+	>>> sum(*nums)
+	6
+
+
+关键字参数
+	def person(name, age, **kw):
+	    print('name:', name, 'age:', age, 'other:', kw)
+
+	>>> extra = {'city': 'Beijing', 'job': 'Engineer'}
+	>>> person('Jack', 24, city=extra['city'], job=extra['job'])
+
+	>>> extra = {'city': 'Beijing', 'job': 'Engineer'}
+	>>> person('Jack', 24, **extra)
+	name: Jack age: 24 other: {'city': 'Beijing', 'job': 'Engineer'}
+
+	**extra表示把extra这个dict的所有key-value用关键字参数传入到函数的**kw参数，kw将获得
+	一个dict，注意kw获得的dict是extra的一份拷贝，对kw的改动不会影响到函数外的extra。
+
+
+命名关键字参数
+	对于关键字参数，函数的调用者可以传入任意不受限制的关键字参数。至于到底传入了哪些，
+	就需要在函数内部通过kw检查。
+
+	仍以person()函数为例，我们希望检查是否有city和job参数：
+
+	def person(name, age, **kw):
+	    if 'city' in kw:
+	        # 有city参数
+	        pass
+	    if 'job' in kw:
+	        # 有job参数
+	        pass
+	    print('name:', name, 'age:', age, 'other:', kw)
+
+
+	但是调用者仍可以传入不受限制的关键字参数：
+	>>> person('Jack', 24, city='Beijing', addr='Chaoyang', zipcode=123456)
+
+
+	如果要限制关键字参数的名字，就可以用命名关键字参数，例如，只接收city和job作为关键字参数。这种方式定义的函数如下：
+	def person(name, age, *, city, job):
+	    print(name, age, city, job)
+
+	和关键字参数**kw不同，命名关键字参数需要一个特殊分隔符*，*后面的参数被视为命名关键字参数。
+
+	调用方式如下：
+	>>> person('Jack', 24, city='Beijing', job='Engineer')
+	Jack 24 Beijing Engineer
+
+	命名关键字参数必须传入参数名，这和位置参数不同。如果没有传入参数名，调用将报错：
+		>>> person('Jack', 24, 'Beijing', 'Engineer')
+		Traceback (most recent call last):
+		  File "<stdin>", line 1, in <module>
+		TypeError: person() takes 2 positional arguments but 4 were given
+	由于调用时缺少参数名city和job，Python解释器把这4个参数均视为位置参数，但person()函数仅接受2个位置参数。
+
+
+	命名关键字参数可以有缺省值，从而简化调用：
+		def person(name, age, *, city='Beijing', job):
+		    print(name, age, city, job)
+
+	由于命名关键字参数city具有默认值，调用时，可不传入city参数：
+		>>> person('Jack', 24, job='Engineer')
+		Jack 24 Beijing Engineer
+
+	使用命名关键字参数时，要特别注意，*不是参数，而是特殊分隔符。如果缺少*，
+	Python解释器将无法识别位置参数和命名关键字参数：
+
+	def person(name, age, city, job):
+	    # 缺少 *，city和job被视为位置参数
+	    pass
+
+参数组合
+
+	在Python中定义函数，可以用必选参数、默认参数、可变参数、关键字参数和命名关键字
+	参数，这5种参数都可以组合使用，除了可变参数无法和命名关键字参数混合。但是请注意，
+	参数定义的顺序必须是：必选参数、默认参数、可变参数/命名关键字参数和关键字参数。
+
+	比如定义一个函数，包含上述若干种参数：
+		def f1(a, b, c=0, *args, **kw):
+		    print('a =', a, 'b =', b, 'c =', c, 'args =', args, 'kw =', kw)
+
+		def f2(a, b, c=0, *, d, **kw):
+		    print('a =', a, 'b =', b, 'c =', c, 'd =', d, 'kw =', kw)
+
+	在函数调用的时候，Python解释器自动按照参数位置和参数名把对应的参数传进去。
+		>>> f1(1, 2)
+		a = 1 b = 2 c = 0 args = () kw = {}
+
+		>>> f1(1, 2, c=3)
+		a = 1 b = 2 c = 3 args = () kw = {}
+
+		>>> f1(1, 2, 3, 'a', 'b')
+		a = 1 b = 2 c = 3 args = ('a', 'b') kw = {}
+
+		>>> f1(1, 2, 3, 'a', 'b', x=99)
+		a = 1 b = 2 c = 3 args = ('a', 'b') kw = {'x': 99}
+
+		>>> f2(1, 2, d=99, ext=None)
+		a = 1 b = 2 c = 0 d = 99 kw = {'ext': None}
+
+	最神奇的是通过一个tuple和dict，你也可以调用上述函数：
+		>>> args = (1, 2, 3, 4)
+		>>> kw = {'d': 99, 'x': '#'}
+		>>> f1(*args, **kw)
+		a = 1 b = 2 c = 3 args = (4,) kw = {'d': 99, 'x': '#'}
+
+		>>> args = (1, 2, 3)
+		>>> kw = {'d': 88, 'x': '#'}
+		>>> f2(*args, **kw)
+		a = 1 b = 2 c = 3 d = 88 kw = {'x': '#'}
+	所以，对于任意函数，都可以通过类似func(*args, **kw)的形式调用它，
+	无论它的参数是如何定义的。
+
+
+函数参数小结
+
+	默认参数一定要用不可变对象，如果是可变对象，程序运行时会有逻辑错误！
+
+	要注意定义可变参数和关键字参数的语法：
+		*args是可变参数，args接收的是一个tuple；
+		**kw是关键字参数，kw接收的是一个dict。
+
+	以及调用函数时如何传入可变参数和关键字参数的语法：
+		可变参数既可以直接传入：func(1, 2, 3)，又可以先组装list或tuple，
+		再通过*args传入：func(*(1, 2, 3))；
+
+		关键字参数既可以直接传入：func(a=1, b=2)，又可以先组装dict，
+		再通过**kw传入：func(**{'a': 1, 'b': 2})。
+
+	使用*args和**kw是Python的习惯写法，当然也可以用其他参数名，但最好使用习惯用法。
+
+	命名的关键字参数是为了限制调用者可以传入的参数名，同时可以提供默认值。
+
+	定义命名的关键字参数不要忘了写分隔符*，否则定义的将是位置参数。
+
+递归函数：
+	def fact(n):
+	    if n==1:
+	        return 1
+	    return n * fact(n - 1)
+
+
+	递归函数计算过程：
+	===> fact(5)
+	===> 5 * fact(4)
+	===> 5 * (4 * fact(3))
+	===> 5 * (4 * (3 * fact(2)))
+	===> 5 * (4 * (3 * (2 * fact(1))))
+	===> 5 * (4 * (3 * (2 * 1)))
+	===> 5 * (4 * (3 * 2))
+	===> 5 * (4 * 6)
+	===> 5 * 24
+	===> 120
+
+========================================================
+Python高级特性
+
+切片操作：
+	Python支持L[-1]取倒数第一个元素，那么它同样支持倒数切片，试试：
+		>>> L[-2:]
+		['Bob', 'Jack']
+		>>> L[-2:-1]
+		['Bob']
+
+	List[start,end,step]
+		step为正整数时，是从左到右切片
+		step为负整数时，是从右到左切片
+
+	列表、元组和字符串序列类型都可以切片
+
+循环操作：
+
+	如何判断一个对象是可迭代对象呢？方法是通过collections模块的Iterable类型判断：
+		>>> from collections import Iterable
+
+		>>> isinstance('abc', Iterable) # str是否可迭代
+		True
+		>>> isinstance([1,2,3], Iterable) # list是否可迭代
+		True
+		>>> isinstance(123, Iterable) # 整数是否可迭代
+		False
+
+
+	最后一个小问题，如果要对list实现类似Java那样的下标循环怎么办？Python内置的enumerate函数可以把一个list变成索引-元素对，这样就可以在for循环中同时迭代索引和元素本身：
+		>>> for i, value in enumerate(['A', 'B', 'C']):
+		...     print(i, value)
+		...
+		0 A
+		1 B
+		2 C
+
+	上面的for循环里，同时引用了两个变量，在Python里是很常见的，比如下面的代码：
+		>>> for x, y in [(1, 1), (2, 4), (3, 9)]:
+		...     print(x, y)
+		...
+		1 1
+		2 4
+		3 9
+
+循环小结
+	任何可迭代对象都可以作用于for循环，包括我们自定义的数据类型，只要符合迭代条件，
+	就可以使用for循环。
+
+	怎么定义一个可迭代对象？？？
+
+
+列表生成式：
+	>>> [x * x for x in range(1, 11)]
+	[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+
+	for循环后面还可以加上if判断，这样我们就可以筛选出仅偶数的平方：
+	>>> [x * x for x in range(1, 11) if x % 2 == 0]
+	[4, 16, 36, 64, 100]
+
+	还可以使用两层循环，可以生成全排列：
+	>>> [m + n for m in 'ABC' for n in 'XYZ']
+	['AX', 'AY', 'AZ', 'BX', 'BY', 'BZ', 'CX', 'CY', 'CZ']
+
+	列出当前目录下的所有文件和目录名，可以通过一行代码实现：
+	>>> import os # 导入os模块，模块的概念后面讲到
+	>>> [d for d in os.listdir('.')] # os.listdir可以列出文件和目录
+
+	列表生成式也可以使用两个变量来生成list：
+	>>> d = {'x': 'A', 'y': 'B', 'z': 'C' }
+	>>> [k + '=' + v for k, v in d.items()]
+	['y=B', 'x=A', 'z=C']
+
+	把一个list中所有的字符串变成小写：
+	>>> L = ['Hello', 'World', 'IBM', 'Apple']
+	>>> [s.lower() for s in L]
+	['hello', 'world', 'ibm', 'apple']
+
+列表小结：
+	列表生成式，可快速生成list，可通过一个list推导出另一个list，而代码却十分简洁。
+
+
+生成器：
+	通过列表生成式，我们可以直接创建一个列表。但是，受到内存限制，列表容量肯定是
+	有限的。而且，创建一个包含100万个元素的列表，不仅占用很大的存储空间，如果我们
+	仅仅需要访问前面几个元素，那后面绝大多数元素占用的空间都白白浪费了。
+
+	所以，如果列表元素可以按照某种算法推算出来，那我们是否可以在循环的过程中不断
+	推算出后续的元素呢？这样就不必创建完整的list，从而节省大量的空间。在Python中，
+	这种一边循环一边计算的机制，称为生成器：generator。
+
+创建生成器：
+	要创建一个generator，有很多种方法。
+	第一种方法很简单，只要把一个列表生成式的[]改成()，就创建了一个generator：
+	>>> L = [x * x for x in range(10)]
+	>>> L
+	[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+
+	>>> g = (x * x for x in range(10))
+	>>> g
+	<generator object <genexpr> at 0x1022ef630>
+
+	可以通过next()函数获得generator的下一个返回值。
+
+	generator保存的是算法，每次调用next(g)，就计算出g的下一个元素的值，
+	直到计算到最后一个元素，没有更多的元素时，抛出StopIteration的错误。
+
+	但实际上，创建了一个generator后，基本上永远不会调用next()，
+	而是通过for循环来迭代它，并且不需要关心StopIteration的错误。
+
+
+	yield关键字定义生成器：
+		def fib(max):
+		    n, a, b = 0, 0, 1
+		    while n < max:
+		        yield b
+		        a, b = b, a + b
+		        n = n + 1
+		    return 'done'
+
+		>>> f = fib(6)
+		>>> f
+		<generator object fib at 0x104feaaa0>
+
+		这里，最难理解的就是generator和函数的执行流程不一样。函数是顺序执行，
+		遇到return语句或者最后一行函数语句就返回。而变成generator的函数，
+		在每次调用next()的时候执行，遇到yield语句返回，再次执行时
+		从上次返回的yield语句处继续执行。
+
+		举个简单的例子，定义一个generator，依次返回数字1，3，5：
+			def odd():
+			    print('step 1')
+			    yield 1
+			    print('step 2')
+			    yield(3)
+			    print('step 3')
+			    yield(5)
+
+		调用该generator时，首先要生成一个generator对象，然后用next()函数
+		不断获得下一个返回值。
+
+
+迭代器：
+
+	可以直接作用于for循环的数据类型有以下几种：
+		一类是集合数据类型，如list、tuple、dict、set、str等；
+		一类是generator，包括生成器和带yield的generator function。
+
+
+	可以直接作用于for循环的对象统称为可迭代对象：Iterable。
+	可以被next()函数调用并不断返回下一个值的对象称为迭代器：Iterator。
+
+
+
+	可以使用isinstance()判断一个对象是否是Iterable对象：
+		>>> from collections import Iterable
+		>>> isinstance([], Iterable)
+		True
+		>>> isinstance({}, Iterable)
+		True
+		>>> isinstance('abc', Iterable)
+		True
+		>>> isinstance((x for x in range(10)), Iterable)
+		True
+		>>> isinstance(100, Iterable)
+		False
+
+	生成器不但可以作用于for循环，还可以被next()函数不断调用并返回下一个值，
+	直到最后抛出StopIteration错误表示无法继续返回下一个值了。
+
+	可以使用isinstance()判断一个对象是否是Iterator对象：
+		>>> from collections import Iterator
+		>>> isinstance((x for x in range(10)), Iterator)
+		True
+		>>> isinstance([], Iterator)
+		False
+		>>> isinstance({}, Iterator)
+		False
+		>>> isinstance('abc', Iterator)
+		False
+
+	生成器都是Iterator对象，但list、dict、str虽然是Iterable，却不是Iterator。
+	把list、dict、str等Iterable变成Iterator可以使用iter()函数：
+
+		>>> isinstance(iter([]), Iterator)
+		True
+		>>> isinstance(iter('abc'), Iterator)
+		True
+
+	为什么list、dict、str等数据类型不是Iterator？
+
+	因为Python的Iterator对象表示的是一个数据流，Iterator对象可以被next()函数调用
+	并不断返回下一个数据，直到没有数据时抛出StopIteration错误。
+	可以把这个数据流看做是一个有序序列，但我们却不能提前知道序列的长度，只能不断
+	通过next()函数实现按需计算下一个数据，所以Iterator的计算是惰性的，只有在需要
+	返回下一个数据时它才会计算。
+
+	Iterator甚至可以表示一个无限大的数据流，例如全体自然数。而使用list是永远不可能
+	存储全体自然数的。
+
+
+迭代器小结：
+
+	凡是可作用于for循环的对象都是Iterable类型；
+	凡是可作用于next()函数的对象都是Iterator类型，它们表示一个惰性计算的序列；
+
+	集合数据类型如list、dict、str等是Iterable但不是Iterator，不过可以通过iter()
+	函数获得一个Iterator对象。
+
+	Python的for循环本质上就是通过不断调用next()函数实现的，例如：
+		for x in [1, 2, 3, 4, 5]:
+		    pass
+	实际上完全等价于：
+		# 首先获得Iterator对象:
+		it = iter([1, 2, 3, 4, 5])
+		# 循环:
+		while True:
+		    try:
+		        # 获得下一个值:
+		        x = next(it)
+		    except StopIteration:
+		        # 遇到StopIteration就退出循环
+		        break
+
+=============================================================
+
+函数式编程
+
+高阶函数：
+	函数名也是变量。
+	一个可以接收函数作为参数的函数，就是高阶函数。
+	编写高阶函数，就是让函数的参数能够接收别的函数。
+	把函数作为参数传入，这样的函数称为高阶函数，函数式编程就是指这种高度抽象的编程范式。
+
+高阶函数map:
+	若读过Google的那篇大名鼎鼎的论文“MapReduce: Simplified Data Processing on Large Clusters”，
+	就能大概明白map/reduce的概念。
+
+	map()函数接收两个参数，一个是函数，一个是Iterable，map将传入的函数依次作用到序列的每个元素，
+	并把结果作为新的Iterator返回。
+	Iterator是惰性序列，通过list()函数让它把整个序列都计算出来并返回一个list。
+
+	把这个list所有数字转为字符串，只需要一行代码：
+		>>> result = map(str,range(10))
+
+
+高阶函数reduce:
+	reduce把一个函数作用在一个序列[x1, x2, x3, ...]上，这个函数必须接收两个参数，
+	reduce把结果继续和序列的下一个元素做累积计算，其效果就是：
+		reduce(f, [x1, x2, x3, x4]) = f(f(f(x1, x2), x3), x4)
+
+	把序列[1, 3, 5, 7, 9]变换成整数13579，reduce就可以派上用场：
+		>>> from functools import reduce
+		>>> reduce(lambda x,y : x * 10 + y, range(1,10,2))
+		13579
+
+	假设Python没有提供int()函数，编写函数使字符串变为整数，代码及其简洁。
+		>>> def char2num(c):
+			return {'0':0, '1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9}[c]
+
+		>>> def str2int(s):
+			return reduce(lambda x,y : x * 10 + y, map(char2num, s))
+
+		>>> str2int('12345')
+		12345
+
+
+	练习：
+		用户名输入不规范，请将首字母大写，其余字母均为小写。
+			>>> r = map(str.capitalize, ['yangLili', 'jack', 'liSa'])
+			>>> list(r)
+			['Yanglili', 'Jack', 'Lisa']
+
+
+		累成函数：
+			>>> from functools import reduce
+			>>> reduce(lambda x,y : x * y, range(1,10))
+			362880
+
+高阶函数filter:
+	Python内建的filter()函数用于过滤序列。
+
+	filter()也接收一个函数和一个序列。和map()不同的时，filter()把传入的函数依次作用于每个元素，
+	然后根据返回值是True还是False决定保留还是丢弃该元素。
+	filter()函数返回的是一个Iterator，也就是一个惰性序列，所以要强迫filter()完成计算结果，
+	需要用list()函数获得所有结果并返回list。
+
+	用filter()这个高阶函数，关键在于正确实现一个“筛选”函数。
+
+
+	用filter求素数：
+		计算素数的一个方法是埃氏筛法，它的算法理解起来非常简单：
+
+		首先，列出从2开始的所有自然数，构造一个序列：
+		2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...
+
+		取序列的第一个数2，它一定是素数，然后用2把序列的2的倍数筛掉：
+		3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...
+
+		取新序列的第一个数3，它一定是素数，然后用3把序列的3的倍数筛掉：
+		5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...
+
+		取新序列的第一个数5，然后用5把序列的5的倍数筛掉：
+		7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...
+
+		不断筛下去，就可以得到所有的素数。
+
+
+		用Python来实现这个算法，可以先构造一个从3开始的奇数序列：
+				def _odd_iter():
+					n = 1
+					while True:
+						n = n + 2
+						yield n
+		注意这是一个生成器，并且是一个无限序列。
+
+
+		然后定义一个筛选函数：
+				def _not_divisible(n):
+					return lambda x: x % n > 0
+
+
+		最后，定义一个生成器，不断返回下一个素数：
+				def primes():
+					yield 2
+					it = _odd_iter() # 初始序列
+					while True:
+						n = next(it) # 返回序列的第一个数
+						yield n
+						it = filter(_not_divisible(n), it) # 构造新序列
+		这个生成器先返回第一个素数2，然后，利用filter()不断产生筛选后的新的序列。
+
+
+		由于primes()也是一个无限序列，所以调用时需要设置一个退出循环的条件：
+				# 打印1000以内的素数:
+				for n in primes():
+					if n < 1000:
+						print(n)
+					else:
+						break
+
+	注意到Iterator是惰性计算的序列，所以可以用Python表示“全体自然数”，“全体素数”这样的序列，而代码非常简洁。
+
+
+	回数是指从左向右读和从右向左读都是一样的数，例如12321，909。请利用filter()滤掉非回数：
+		>>> def is_palindrome(n):
+			s = str(n)
+			if len(s) == 1:
+				return False
+			i = 0
+			while i <= len(s)/2:
+				if s[i] != s[len(s) - i - 1]:
+					return False
+				i += 1
+			return True
+
+		>>> r = filter(is_palindrome, range(200))
+		>>> list(r)
+		[11, 22, 33, 44, 55, 66, 77, 88, 99, 101, 111, 121, 131, 141, 151, 161, 171, 181, 191]
+
+高阶函数sorted:
+	Python内置的sorted()函数就可以对list进行排序：
+		>>> sorted([36, 5, -12, 9, -21])
+		[-21, -12, 5, 9, 36]
+
+
+	此外，sorted()函数也是一个高阶函数，它可以接收一个key函数来实现自定义的排序，例如按绝对值大小排序：
+		>>> sorted([36, 5, -12, 9, -21], key=abs)
+		[5, 9, -12, -21, 36]
+
+	key指定的函数将作用于list的每一个元素上，并根据key函数返回的结果进行排序。
+	对比原始的list和经过key=abs处理过的list：
+		list = [36, 5, -12, 9, -21]
+		keys = [36, 5,  12, 9,  21]
+	然后sorted()函数按照keys进行排序，并按照对应关系返回list相应的元素：
+		keys排序结果 => [5, 9,  12,  21, 36]
+						|  |    |    |   |
+		最终结果     => [5, 9, -12, -21, 36]
+
+
+	给sorted传入key函数，即可实现忽略大小写的排序：
+		>>> sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower)
+		['about', 'bob', 'Credit', 'Zoo']
+
+	要进行反向排序，不必改动key函数，可以传入第三个参数reverse=True：
+		>>> sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower, reverse=True)
+		['Zoo', 'Credit', 'bob', 'about']
+
+	从上述例子可以看出，高阶函数的抽象能力是非常强大的，而且，核心代码可以保持得非常简洁。
+
+	sorted高阶函数小结：
+		sorted()也是一个高阶函数。用sorted()排序的关键在于实现一个映射函数。
+
+	练习：
+		按姓名排序 L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
+			>>> L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
+			>>> def by_name(t):
+				return t[0]
+			>>> sorted(L,key = by_name)
+			[('Adam', 92), ('Bart', 66), ('Bob', 75), ('Lisa', 88)]
+
+		按成绩从高到低排序 L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
+			>>> def by_score(t):
+				return t[1]
+
+			>>> sorted(L, key = by_score, reverse = True)
+			[('Adam', 92), ('Lisa', 88), ('Bob', 75), ('Bart', 66)]
+
+
+返回函数：
+	函数作为返回值：
+		高阶函数除了可以接受函数作为参数外，还可以把函数作为结果值返回。
+
+		通常情况下，求和的函数是这样定义的：
+				def calc_sum(*args):
+					ax = 0
+					for n in args:
+						ax = ax + n
+					return ax
+		但是，如果不需要立刻求和，而是在后面的代码中，根据需要再计算怎么办？
+		可以不返回求和的结果，而是返回求和的函数：
+				def lazy_sum(*args):
+					def sum():
+						ax = 0
+						for n in args:
+							ax = ax + n
+						return ax
+					return sum
+
+		当我们调用lazy_sum()时，返回的并不是求和结果，而是求和函数：
+				>>> f = lazy_sum(1, 3, 5, 7, 9)
+				>>> f
+				<function lazy_sum.<locals>.sum at 0x101c6ed90>
+
+		调用函数f时，才真正计算求和的结果：
+				>>> f()
+				25
+		在这个例子中，我们在函数lazy_sum中又定义了函数sum，并且，内部函数sum可以引用外部函数lazy_sum的参数
+		和局部变量，当lazy_sum返回函数sum时，相关参数和变量都保存在返回的函数中，这种称为“闭包（Closure）”
+		的程序结构拥有极大的威力。
+
+		请再注意一点，当我们调用lazy_sum()时，每次调用都会返回一个新的函数，即使传入相同的参数：
+				>>> f1 = lazy_sum(1, 3, 5, 7, 9)
+				>>> f2 = lazy_sum(1, 3, 5, 7, 9)
+				>>> f1==f2
+				False
+		f1()和f2()的调用结果互不影响。
+
+	闭包：
+		注意到返回的函数在其定义内部引用了局部变量args，所以，当一个函数返回了一个函数后，
+		其内部的局部变量还被新函数引用，所以，闭包用起来简单，实现起来可不容易。
+
+		另一个需要注意的问题是，返回的函数并没有立刻执行，而是直到调用了f()才执行。我们来看一个例子：
+				def count():
+					fs = []
+					for i in range(1, 4):
+						def f():
+							 return i*i
+						fs.append(f)
+					return fs
+
+				f1, f2, f3 = count()
+
+		在上面的例子中，每次循环，都创建了一个新的函数，然后，把创建的3个函数都返回了。
+		你可能认为调用f1()，f2()和f3()结果应该是1，4，9，但实际结果是：
+				>>> f1()
+				9
+				>>> f2()
+				9
+				>>> f3()
+				9
+		全部都是9！原因就在于返回的函数引用了变量i，但它并非立刻执行。等到3个函数都返回时，
+		它们所引用的变量i已经变成了3，因此最终结果为9。
+
+		返回闭包时牢记的一点就是：返回函数不要引用任何循环变量，或者后续会发生变化的变量。
+
+		如果一定要引用循环变量怎么办？
+		方法是再创建一个函数，用该函数的参数绑定循环变量当前的值，无论该循环变量后续如何更改，
+		已绑定到函数参数的值不变：
+				def count():
+					def f(j):
+						def g():
+							return j*j
+						return g
+					fs = []
+					for i in range(1, 4):
+						fs.append(f(i)) # f(i)立刻被执行，因此i的当前值被传入f()
+					return fs
+
+		再看看结果：
+				>>> f1, f2, f3 = count()
+				>>> f1()
+				1
+				>>> f2()
+				4
+				>>> f3()
+				9
+		缺点是代码较长，可利用lambda函数缩短代码。
+
+	返回函数小结：
+		一个函数可以返回一个计算结果，也可以返回一个函数。
+		返回一个函数时，牢记该函数并未执行，返回函数中不要引用任何可能会变化的变量。
+
+匿名函数：
+	f = lambda x: x * x
+
+装饰器：
+	函数对象有一个__name__属性，可以拿到函数的名字。
+	由于函数也是一个对象，而且函数对象可以被赋值给变量，所以，通过变量也能调用该函数。
+			>>> def now():
+			...     print('2015-3-25')
+			...
+			>>> f = now
+			>>> f()
+			2015-3-25
+
+	函数对象有一个__name__属性，可以拿到函数的名字：
+			>>> now.__name__
+			'now'
+			>>> f.__name__
+			'now'
+
+	现在，假设我们要增强now()函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改now()函数的定义，
+	这种在代码运行期间动态增加功能的方式，称之为“装饰器”（Decorator）。
+
+	本质上，decorator就是一个返回函数的高阶函数。所以，我们要定义一个能打印日志的decorator，可以定义如下：
+			def log(func):
+				def wrapper(*args, **kw):
+					print('call %s():' % func.__name__)
+					return func(*args, **kw)
+				return wrapper
+	观察上面的log，因为它是一个decorator，所以接受一个函数作为参数，并返回一个函数。
+	我们要借助Python的@语法，把decorator置于函数的定义处：
+			@log
+			def now():
+				print('2015-3-25')
+
+	调用now()函数，不仅会运行now()函数本身，还会在运行now()函数前打印一行日志：
+			>>> now()
+			call now():
+			2015-3-25
+
+	把@log放到now()函数的定义处，相当于执行了语句：
+			now = log(now)
+
+	由于log()是一个decorator，返回一个函数，所以，原来的now()函数仍然存在，只是现在同名的now变量指向了
+	新的函数，于是调用now()将执行新函数，即在log()函数中返回的wrapper()函数。
+
+	wrapper()函数的参数定义是(*args, **kw)，因此，wrapper()函数可以接受任意参数的调用。
+	在wrapper()函数内，首先打印日志，再紧接着调用原始函数。
+
+	如果decorator本身需要传入参数，那就需要编写一个返回decorator的高阶函数，写出来会更复杂。
+	比如，要自定义log的文本：
+			def log(text):
+				def decorator(func):
+					def wrapper(*args, **kw):
+						print('%s %s():' % (text, func.__name__))
+						return func(*args, **kw)
+					return wrapper
+				return decorator
+
+	这个3层嵌套的decorator用法如下：
+			@log('execute')
+			def now():
+				print('2015-3-25')
+
+	执行结果如下：
+			>>> now()
+			execute now():
+			2015-3-25
+
+	和两层嵌套的decorator相比，3层嵌套的效果是这样的：
+			>>> now = log('execute')(now)
+
+	我们来剖析上面的语句，首先执行log('execute')，返回的是decorator函数，再调用返回的函数，
+	参数是now函数，返回值最终是wrapper函数。
+
+	以上两种decorator的定义都没有问题，但还差最后一步。因为我们讲了函数也是对象，它有__name__等属性，
+	但你去看经过decorator装饰之后的函数，它们的__name__已经从原来的'now'变成了'wrapper'：
+			>>> now.__name__
+			'wrapper'
+
+	因为返回的那个wrapper()函数名字就是'wrapper'，所以，需要把原始函数的__name__等属性复制到
+	wrapper()函数中，否则，有些依赖函数签名的代码执行就会出错。
+
+	不需要编写wrapper.__name__ = func.__name__这样的代码，Python内置的functools.wraps就是干这个事的，
+	所以，一个完整的decorator的写法如下：
+			import functools
+			def log(func):
+				@functools.wraps(func)
+				def wrapper(*args, **kw):
+					print('call %s():' % func.__name__)
+					return func(*args, **kw)
+				return wrapper
+
+	或者针对带参数的decorator：
+			import functools
+			def log(text):
+				def decorator(func):
+					@functools.wraps(func)
+					def wrapper(*args, **kw):
+						print('%s %s():' % (text, func.__name__))
+						return func(*args, **kw)
+					return wrapper
+				return decorator
+
+	装饰器小结：
+		在面向对象（OOP）的设计模式中，decorator被称为装饰模式。OOP的装饰模式需要通过继承和组合来实现，
+		而Python除了能支持OOP的decorator外，直接从语法层次支持decorator。Python的decorator可以用函数实现，
+		也可以用类实现。
+
+		decorator可以增强函数的功能，定义起来虽然有点复杂，但使用起来非常灵活和方便。
+
+	请编写一个decorator，能在函数调用的前后打印出'begin call'和'end call'的日志。
+	再思考一下能否写出一个@log的decorator，使它既支持：
+			@log
+			def f():
+				pass
+			又支持：
+			@log('execute')
+			def f():
+				pass
+
+			import functools
+			def log(arg):
+				def decorator(func=arg):
+					text='call' if func==arg else arg
+					@functools.wraps(func)
+					def wrapper(*args,**kw):
+						print('%s %s():' % (text,func.__name__))
+						return (func(*args, **kw),print('end %s %s():' % (text, func.__name__)))[0]
+					return wrapper
+				return decorator() if callable(arg) else decorator
+
+偏函数：
+	Python的functools模块提供了很多有用的功能，其中一个就是偏函数（Partial function）。
+	要注意，这里的偏函数和数学意义上的偏函数不一样。
+
+	在介绍函数参数的时候，我们讲到，通过设定参数的默认值，可以降低函数调用的难度。
+	而偏函数也可以做到这一点。举例如下：
+
+	int()函数可以把字符串转换为整数，当仅传入字符串时，int()函数默认按十进制转换：
+			>>> int('12345')
+			12345
+
+	但int()函数还提供额外的base参数，默认值为10。如果传入base参数，就可以做N进制的转换：
+			>>> int('12345', base=8)
+			5349
+			>>> int('12345', 16)
+			74565
+
+	假设要转换大量的二进制字符串，每次都传入int(x, base=2)非常麻烦，
+	于是，我们想到，可以定义一个int2()的函数，默认把base=2传进去：
+			def int2(x, base=2):
+				return int(x, base)
+	这样，我们转换二进制就非常方便了：
+			>>> int2('1000000')
+			64
+			>>> int2('1010101')
+			85
+
+	functools.partial就是帮助我们创建一个偏函数的，不需要我们自己定义int2()，
+	可以直接使用下面的代码创建一个新的函数int2：
+			>>> import functools
+			>>> int2 = functools.partial(int, base=2)
+			>>> int2('1000000')
+			64
+			>>> int2('1010101')
+			85
+
+	所以，简单总结functools.partial的作用就是，把一个函数的某些参数给固定住（也就是设置默认值），
+	返回一个新的函数，调用这个新函数会更简单。
+
+	注意到上面的新的int2函数，仅仅是把base参数重新设定默认值为2，但也可以在函数调用时传入其他值：
+			>>> int2('1000000', base=10)
+			1000000
+
+
+	最后，创建偏函数时，实际上可以接收函数对象、*args和**kw这3个参数，当传入：
+			int2 = functools.partial(int, base=2)
+
+	实际上固定了int()函数的关键字参数base，也就是：
+			int2('10010')
+	相当于：
+			kw = { 'base': 2 }
+			int('10010', **kw)
+	当传入：
+			max2 = functools.partial(max, 10)
+
+	实际上会把10作为*args的一部分自动加到左边，也就是：
+			max2(5, 6, 7)
+	相当于：
+			args = (10, 5, 6, 7)
+			max(*args)
+	结果为10。
+
+	偏函数小结：
+		当函数的参数个数太多，需要简化时，使用functools.partial可以创建一个新的函数，
+		这个新函数可以固定住原函数的部分参数，从而在调用时更简单。
+
+
+===================================================================
+
+模块
+
+	一个.py文件就称之为一个模块（Module）
+
+	使用模块有什么好处：
+	一、最大的好处是大大提高了代码的可维护性。
+	二、编写代码不必从零开始。当一个模块编写完毕，就可以被其他地方引用。
+		我们在编写程序的时候，也经常引用其他模块，包括Python内置的模块和来自第三方的模块。
+	三、使用模块还可以避免函数名和变量名冲突。但是也要注意，尽量不要与内置函数名字冲突。
+
+	如果不同的人编写的模块名相同怎么办？
+	为了避免模块名冲突，Python又引入了按目录来组织模块的方法，称为包（Package）。
+
+	请注意，每一个包目录下面都会有一个__init__.py的文件，这个文件是必须存在的，
+	否则，Python就把这个目录当成普通目录，而不是一个包。
+	__init__.py可以是空文件，也可以有Python代码，
+	因为__init__.py本身就是一个模块，而它的模块名就是mycompany。
+
+	自己创建模块时要注意命名，不能和Python自带的模块名称冲突。
+	例如，系统自带了sys模块，自己的模块就不可命名为sys.py，否则将无法导入系统自带的sys模块。
+
+使用模块：
+		#!/usr/bin/env python3
+		# -*- coding: utf-8 -*-
+
+		' a test module '
+
+		__author__ = 'Michael Liao'
+
+		import sys
+
+		def test():
+			args = sys.argv
+			if len(args)==1:
+					print('Hello, world!')
+			elif len(args)==2:
+				print('Hello, %s!' % args[1])
+			else:
+				print('Too many arguments!')
+
+		if __name__=='__main__':
+			test()
+
+		第1行和第2行是标准注释，第1行注释可以让这个hello.py文件直接在Unix/Linux/Mac上运行
+		第2行注释表示.py文件本身使用标准UTF-8编码；
+		第4行是一个字符串，表示模块的文档注释，任何模块代码的第一个字符串都被视为模块的文档注释；
+
+		sys模块有一个argv变量，用list存储了命令行的所有参数。
+		argv至少有一个元素，因为第一个参数永远是该.py文件的名称，
+		例如：
+			运行python3 hello.py获得的sys.argv就是['hello.py']；
+			运行python3 hello.py Michael获得的sys.argv就是['hello.py', 'Michael]
+
+		在命令行运行hello模块文件时，Python解释器把一个特殊变量__name__置为__main__，
+		而如果在其他地方导入该hello模块时，if判断将失败，因此，这种if测试可以让一个模块通过
+		命令行运行时执行一些额外的代码，最常见的就是运行测试。
+
+安装第三方模块：
+	安装一个第三方库——Python Imaging Library，这是Python下非常强大的处理图像的工具库。
+	不过，PIL目前只支持到Python 2.7，并且有年头没有更新了，因此，基于PIL的Pillow项目开发非常活跃，
+	并且支持最新的Python 3。
+
+	一般来说，第三方库都会在Python官方的pypi.python.org网站注册，要安装一个第三方库，
+	必须先知道该库的名称，可以在官网或者pypi上搜索，比如Pillow的名称叫Pillow，
+	因此，安装Pillow的命令就是：pip install Pillow
+
+	有了Pillow，处理图片易如反掌。随便找个图片生成缩略图：
+			>>> from PIL import Image
+			>>> im = Image.open('test.png')
+			>>> print(im.format, im.size, im.mode)
+			PNG (400, 300) RGB
+			>>> im.thumbnail((200, 100))
+			>>> im.save('thumb.jpg', 'JPEG')
+	其他常用的第三方库还有MySQL的驱动：mysql-connector-python，
+	用于科学计算的NumPy库：numpy，用于生成文本的模板工具Jinja2，等等。
+
+================================================================
+
+面向对象编程
+
+	面向对象编程——Object Oriented Programming，简称OOP，是一种程序设计思想。
+	OOP把对象作为程序的基本单元，一个对象包含了数据和操作数据的函数。
+
+	面向过程的程序设计把计算机程序视为一系列的命令集合，即一组函数的顺序执行。
+	为了简化程序设计，面向过程把函数继续切分为子函数，即把大块函数通过切割成小块函数来降低系统的复杂度。
+
+	而面向对象的程序设计把计算机程序视为一组对象的集合，而每个对象都可以接收其他对象发过来的消息，
+	并处理这些消息，计算机程序的执行就是一系列消息在各个对象之间传递。
+
+	在Python中，所有数据类型都可以视为对象，当然也可以自定义对象。
+	自定义的对象数据类型就是面向对象中的类（Class）的概念。
+
+	给对象发消息实际上就是调用对象对应的关联函数，我们称之为对象的方法（Method）。
+
+	面向对象的设计思想是从自然界中来的，因为在自然界中，类（Class）和实例（Instance）的概念是很自然的。
+	面向对象的设计思想是抽象出Class，根据Class创建Instance。
+
+	数据封装、继承和多态是面向对象的三大特点。
+
+类和实例：
+	和静态语言不同，Python允许对实例变量绑定任何数据，也就是说，对于两个实例变量，
+	虽然它们都是同一个类的不同实例，但拥有的变量名称都可能不同
+
+访问限制：
+	直接通过bart.score = 59也可以修改啊，为什么要定义一个方法大费周折？
+	因为在方法中，可以对参数做检查，避免传入无效的参数：
+			class Student(object):
+				...
+
+				def set_score(self, score):
+					if 0 <= score <= 100:
+						self.__score = score
+					else:
+						raise ValueError('bad score')
+
+	需要注意的是，在Python中，变量名类似__xxx__的，也就是以双下划线开头，
+	并且以双下划线结尾的，是特殊变量，特殊变量是可以直接访问的，不是private变量，
+	所以，不能用__name__、__score__这样的变量名。
+
+	以一个下划线开头的实例变量名，比如_name，这样的实例变量外部是可以访问的，
+	但是，按照约定俗成的规定，当你看到这样的变量时，
+	意思就是，“虽然我可以被访问，但是，请把我视为私有变量，不要随意访问”。
+
+	双下划线开头的实例变量是不是一定不能从外部访问呢？其实也不是。不能直接访问__name是
+	因为Python解释器对外把__name变量改成了_Student__name，所以，仍然可以通过_Student__name来
+	访问__name变量：
+			>>> bart._Student__name
+			'Bart Simpson'
+
+继承和多态：
+	继承树
+	判断一个变量是否是某个类型可以用isinstance()判断：
+			>>> isinstance(a, list)
+			True
+			>>> isinstance(b, Animal)
+			True
+			>>> isinstance(c, Dog)
+			True
+
+		多态的好处就是，当我们需要传入Dog、Cat、Tortoise……时，我们只需要接收Animal类型就可以了，
+		因为Dog、Cat、Tortoise……都是Animal类型，然后，按照Animal类型进行操作即可。
+		由于Animal类型有run()方法，因此，传入的任意类型，只要是Animal类或者子类，
+		就会自动调用实际类型的run()方法，这就是多态的意思：
+
+		对于一个变量，我们只需要知道它是Animal类型，无需确切地知道它的子类型，就可以放心地调用run()方法，
+		而具体调用的run()方法是作用在Animal、Dog、Cat还是Tortoise对象上，由运行时该对象的确切类型决定，
+		这就是多态真正的威力：调用方只管调用，不管细节，而当我们新增一种Animal的子类时，
+		只要确保run()方法编写正确，不用管原来的代码是如何调用的。这就是著名的“开闭”原则：
+
+		对扩展开放：允许新增Animal子类；
+		对修改封闭：不需要修改依赖Animal类型的run_twice()等函数。
+
+静态语言vs动态语言：
+	对于静态语言（例如Java）来说，如果需要传入Animal类型，则传入的对象必须是Animal类型或者它的子类，
+	否则，将无法调用run()方法。
+
+	对于Python这样的动态语言来说，则不一定需要传入Animal类型。我们只需要保证传入的对象有
+	一个run()方法就可以了：
+			class Timer(object):
+				def run(self):
+					print('Start...')
+
+	这就是动态语言的“鸭子类型”，它并不要求严格的继承体系，
+	一个对象只要“看起来像鸭子，走起路来像鸭子”，那它就可以被看做是鸭子。
+
+	Python的“file-like object“就是一种鸭子类型。对真正的文件对象，它有一个read()方法，返回其内容。
+	但是，许多对象，只要有read()方法，都被视为“file-like object“。许多函数接收的参数就是“file-like object“，
+	你不一定要传入真正的文件对象，完全可以传入任何实现了read()方法的对象。
+
+继承和多态小结：
+	继承可以把父类的所有功能都直接拿过来，这样就不必重零做起，子类只需要新增自己特有的方法，
+	也可以把父类不适合的方法覆盖重写。
+
+	动态语言的鸭子类型特点决定了继承不像静态语言那样是必须的。
+
+获取对象信息：
+	使用type()
+	使用isinstance()：
+		对于class的继承关系来说，使用type()就很不方便。我们要判断class的类型，可以使用isinstance()函数。
+		能用type()判断的基本类型也可以用isinstance()判断：
+	使用dir()：
+		如果要获得一个对象的所有属性和方法，可以使用dir()函数，它返回一个包含字符串的list，
+		比如，获得一个str对象的所有属性和方法：
+
+		类似__xxx__的属性和方法在Python中都是有特殊用途的，比如__len__方法返回长度。
+		在Python中，如果你调用len()函数试图获取一个对象的长度，实际上，在len()函数内部，
+		它自动去调用该对象的__len__()方法，所以，下面的代码是等价的：
+				>>> len('ABC')
+				>>> 'ABC'.__len__()
+
+		我们自己写的类，如果也想用len(myObj)的话，就自己写一个__len__()方法：
+				>>> class MyDog(object):
+				...     def __len__(self):
+				...         return 100
+				...
+				>>> dog = MyDog()
+				>>> len(dog)
+				100
+
+		仅仅把属性和方法列出来是不够的，
+		配合getattr()、setattr()以及hasattr()，我们可以直接操作一个对象的状态：
+				>>> class MyObject(object):
+				...     def __init__(self):
+				...         self.x = 9
+				...     def power(self):
+				...         return self.x * self.x
+				...
+				>>> obj = MyObject()
+
+		紧接着，可以测试该对象的属性：
+				>>> hasattr(obj, 'x') # 有属性'x'吗？
+				True
+				>>> obj.x
+				9
+				>>> hasattr(obj, 'y') # 有属性'y'吗？
+				False
+				>>> setattr(obj, 'y', 19) # 设置一个属性'y'
+				>>> hasattr(obj, 'y') # 有属性'y'吗？
+				True
+				>>> getattr(obj, 'y') # 获取属性'y'
+				19
+				>>> obj.y # 获取属性'y'
+				19
+
+
+		如果试图获取不存在的属性，会抛出AttributeError的错误：
+				>>> getattr(obj, 'z') # 获取属性'z'
+				Traceback (most recent call last):
+				  File "<stdin>", line 1, in <module>
+				AttributeError: 'MyObject' object has no attribute 'z'
+
+		可以传入一个default参数，如果属性不存在，就返回默认值：
+				>>> getattr(obj, 'z', 404) # 获取属性'z'，如果不存在，返回默认值404
+				404
+
+		也可以获得对象的方法：
+				>>> hasattr(obj, 'power') # 有属性'power'吗？
+				True
+				>>> getattr(obj, 'power') # 获取属性'power'
+				<bound method MyObject.power of <__main__.MyObject object at 0x10077a6a0>>
+				>>> fn = getattr(obj, 'power') # 获取属性'power'并赋值到变量fn
+				>>> fn # fn指向obj.power
+				<bound method MyObject.power of <__main__.MyObject object at 0x10077a6a0>>
+				>>> fn() # 调用fn()与调用obj.power()是一样的
+				81
+
+	获取对象信息小结：
+		通过内置的一系列函数，我们可以对任意一个Python对象进行剖析，拿到其内部的数据。
+		要注意的是，只有在不知道对象信息的时候，我们才会去获取对象信息。如果可以直接写：
+				sum = obj.x + obj.y
+		就不要写：
+				sum = getattr(obj, 'x') + getattr(obj, 'y')
+
+
+		一个正确的用法的例子如下：
+				def readImage(fp):
+					if hasattr(fp, 'read'):
+						return readData(fp)
+					return None
+		假设我们希望从文件流fp中读取图像，我们首先要判断该fp对象是否存在read方法，
+		如果存在，则该对象是一个流，如果不存在，则无法读取。hasattr()就派上了用场。
+
+		请注意，在Python这类动态语言中，根据鸭子类型，有read()方法，不代表该fp对象就是一个文件流，
+		它也可能是网络流，也可能是内存中的一个字节流，但只要read()方法返回的是有效的图像数据，
+		就不影响读取图像的功能。
+
+实例属性和类属性：
+	由于Python是动态语言，根据类创建的实例可以任意绑定属性。
+	给实例绑定属性的方法是通过实例变量，或者通过self变量：
+			class Student(object):
+				def __init__(self, name):
+					self.name = name
+
+			s = Student('Bob')
+			s.score = 90
+
+	但是，如果Student类本身需要绑定一个属性呢？
+	可以直接在class中定义属性，这种属性是类属性，归Student类所有：
+			class Student(object):
+				name = 'Student'
+
+================================================================
+
+面向对象高级编程
+
+	据封装、继承和多态只是面向对象程序设计中最基础的3个概念。
+	在Python中，面向对象还有很多高级特性，允许我们写出非常强大的功能。
+	我们会讨论多重继承、定制类、元类等概念。
+
+使用__slots__
+	可以尝试给实例绑定一个方法：
+			>>> def set_age(self, age): # 定义一个函数作为实例方法
+			...     self.age = age
+			...
+			>>> from types import MethodType
+			>>> s.set_age = MethodType(set_age, s) # 给实例绑定一个方法
+			>>> s.set_age(25) # 调用实例方法
+			>>> s.age # 测试结果
+			25
+	但是，给一个实例绑定的方法，对另一个实例是不起作用的：
+
+	为了给所有实例都绑定方法，可以给class绑定方法：
+			>>> def set_score(self, score):
+			...     self.score = score
+			...
+			>>> Student.set_score = MethodType(set_score, Student)
+
+
+	如果我们想要限制实例的属性怎么办？比如，只允许对Student实例添加name和age属性。
+	为了达到限制的目的，Python允许在定义class的时候，定义一个特殊的__slots__变量，
+	来限制该class实例能添加的属性：
+			class Student(object):
+				__slots__ = ('name', 'age') # 用tuple定义允许绑定的属性名称
+
+	使用__slots__要注意，__slots__定义的属性仅对当前类实例起作用，对继承的子类是不起作用的：
+			>>> class GraduateStudent(Student):
+			...     pass
+			...
+			>>> g = GraduateStudent()
+			>>> g.score = 9999
+
+	除非在子类中也定义__slots__，这样子类实例允许定义的属性就是	自身的__slots__加上
+	父类的__slots__。
+
+使用@property：
+	在绑定属性时，如果我们直接把属性暴露出去，虽然写起来很简单，
+	但是，没办法检查参数，导致可以把成绩随便改：
+			s = Student()
+			s.score = 9999
+	这显然不合逻辑。为了限制score的范围，可以通过一个set_score()方法来设置成绩，
+	再通过一个get_score()来获取成绩，这样，在set_score()方法里，就可以检查参数：
+			class Student(object):
+				def get_score(self):
+					 return self._score
+
+				def set_score(self, value):
+					if not isinstance(value, int):
+						raise ValueError('score must be an integer!')
+					if value < 0 or value > 100:
+						raise ValueError('score must between 0 ~ 100!')
+					self._score = value
+
+	现在，对任意的Student实例进行操作，就不能随心所欲地设置score了：
+			>>> s = Student()
+			>>> s.set_score(60) # ok!
+			>>> s.get_score()
+			60
+			>>> s.set_score(9999)
+			Traceback (most recent call last):
+			  ...
+			ValueError: score must between 0 ~ 100!
+	但是，上面的调用方法又略显复杂，没有直接用属性这么直接简单。
+
+	有没有既能检查参数，又可以用类似属性这样简单的方式来访问类的变量呢？
+	对于追求完美的Python程序员来说，这是必须要做到的！
+
+	还记得装饰器（decorator）可以给函数动态加上功能吗？对于类的方法，装饰器一样起作用。
+	Python内置的@property装饰器就是负责把一个方法变成属性调用的：
+
+			class Student(object):
+
+				@property
+				def score(self):
+					return self._score
+
+				@score.setter
+				def score(self, value):
+					if not isinstance(value, int):
+						raise ValueError('score must be an integer!')
+					if value < 0 or value > 100:
+						raise ValueError('score must between 0 ~ 100!')
+					self._score = value
+	@property的实现比较复杂，我们先考察如何使用。
+	把一个getter方法变成属性，只需要加上@property就可以了，
+	此时，@property本身又创建了另一个装饰器@score.setter，
+	负责把一个setter方法变成属性赋值，于是，我们就拥有一个可控的属性操作：
+			>>> s = Student()
+			>>> s.score = 60 # OK，实际转化为s.set_score(60)
+			>>> s.score # OK，实际转化为s.get_score()
+			60
+			>>> s.score = 9999
+			Traceback (most recent call last):
+			  ...
+			ValueError: score must between 0 ~ 100!
+	注意到这个神奇的@property，我们在对实例属性操作的时候，就知道该属性很可能
+	不是直接暴露的，而是通过getter和setter方法来实现的。
+
+	还可以定义只读属性，只定义getter方法，不定义setter方法就是一个只读属性：
+			class Student(object):
+
+				@property
+				def birth(self):
+					return self._birth
+
+				@birth.setter
+				def birth(self, value):
+					self._birth = value
+
+				@property
+				def age(self):
+					return 2016 - self._birth
+	上面的birth是可读写属性，而age就是一个只读属性，因为age可以根据birth和当前时间计算出来。
+
+	使用@property小结
+		@property广泛应用在类的定义中，可以让调用者写出简短的代码，
+		同时保证对参数进行必要的检查，这样，程序运行时就减少了出错的可能性。
+
+	class Student(object):
+		def __init__(self):
+			pass
+
+		def __init__(self, name, score):
+			self._name = name
+			self._score = score
+
+		@property
+		def score(self):
+			return self._score
+
+		@score.setter
+		def score(self,score):
+			if not isinstance(score, int):
+				raise ValueError('parameter must be a int number')
+			if score > 100 or score < 0:
+				raise ValueError('parameter must in 1~100')
+			self._score = score
+
+	注意：
+		真实的属性名一定不能和方法名相同。
+		访问（get或set）时用@property下面的方法名来间接操作属性。
+
+多重继承：
+	继承是面向对象编程的一个重要的方式，因为通过继承，子类就可以扩展父类的功能。
+
+	回忆一下Animal类层次的设计，假设我们要实现以下4种动物：
+			Dog - 狗狗；
+			Bat - 蝙蝠；
+			Parrot - 鹦鹉；
+			Ostrich - 鸵鸟。
+	如果按照哺乳动物和鸟类归类，我们可以设计出这样的类的层次：
+			Animal
+				--Mammal
+					--Dog
+					--Bat
+				--Bird
+					--Parrot
+					--Ostrich
+
+	但是如果按照“能跑”和“能飞”来归类，我们就应该设计出这样的类的层次：
+			Animal
+				--Runnable
+					--Dog
+					--Ostrich
+				--Flyable
+					--Parrot
+					--Bat
+
+	如果要把上面的两种分类都包含进来，我们就得设计更多的层次：
+		哺乳类：能跑的哺乳类，能飞的哺乳类；
+		鸟类：能跑的鸟类，能飞的鸟类。
+	这么一来，类的层次就复杂了：
+
+	如果要再增加“宠物类”和“非宠物类”，这么搞下去，类的数量会呈指数增长，很明显这样设计是不行的。
+
+	正确的做法是采用多重继承。首先，主要的类层次仍按照哺乳类和鸟类设计：
+			class Animal(object):
+				pass
+
+			# 大类:
+			class Mammal(Animal):
+				pass
+
+			class Bird(Animal):
+				pass
+
+			# 各种动物:
+			class Dog(Mammal):
+				pass
+
+			class Bat(Mammal):
+				pass
+
+			class Parrot(Bird):
+				pass
+
+			class Ostrich(Bird):
+				pass
+
+	现在，我们要给动物再加上Runnable和Flyable的功能，只需要先定义好Runnable和Flyable的类：
+			class Runnable(object):
+				def run(self):
+					print('Running...')
+
+			class Flyable(object):
+				def fly(self):
+					print('Flying...')
+
+	对于需要Runnable功能的动物，就多继承一个Runnable，例如Dog：
+			class Dog(Mammal, Runnable):
+				pass
+
+	对于需要Flyable功能的动物，就多继承一个Flyable，例如Bat：
+			class Bat(Mammal, Flyable):
+				pass
+
+	通过多重继承，一个子类就可以同时获得多个父类的所有功能。
+
+
+	MixIn：
+		在设计类的继承关系时，通常，主线都是单一继承下来的，例如，Ostrich继承自Bird。
+		但是，如果需要“混入”额外的功能，通过多重继承就可以实现，
+		比如，让Ostrich除了继承自Bird外，再同时继承Runnable。
+		这种设计通常称之为MixIn。
+
+		为了更好地看出继承关系，我们把Runnable和Flyable改为RunnableMixIn和FlyableMixIn。
+		类似的，你还可以定义出肉食动物CarnivorousMixIn和植食动物HerbivoresMixIn，
+		让某个动物同时拥有好几个MixIn：
+			class Dog(Mammal, RunnableMixIn, CarnivorousMixIn):
+				pass
+
+		MixIn的目的就是给一个类增加多个功能，这样，在设计类的时候，我们优先考虑通过
+		多重继承来组合多个MixIn的功能，而不是设计多层次的复杂的继承关系。
+
+		Python自带的很多库也使用了MixIn。
+		举个例子，Python自带了TCPServer和UDPServer这两类网络服务，
+		而要同时服务多个用户就必须使用多进程或多线程模型，
+		这两种模型由ForkingMixIn和ThreadingMixIn提供。
+		通过组合，我们就可以创造出合适的服务来。
+
+		比如，编写一个多进程模式的TCP服务，定义如下：
+			class MyTCPServer(TCPServer, ForkingMixIn):
+				pass
+
+		编写一个多线程模式的UDP服务，定义如下：
+			class MyUDPServer(UDPServer, ThreadingMixIn):
+				pass
+
+		如果你打算搞一个更先进的协程模型，可以编写一个CoroutineMixIn：
+			class MyTCPServer(TCPServer, CoroutineMixIn):
+				pass
+
+		这样一来，我们不需要复杂而庞大的继承链，只要选择组合不同的类的功能，
+		就可以快速构造出所需的子类。
+
+	多重继承小结：
+		由于Python允许使用多重继承，因此，MixIn就是一种常见的设计。
+		只允许单一继承的语言（如Java）不能使用MixIn的设计。
+
+定制类：
+	__str__：打印对象
+	__repr__：直接调用对象
+	__iter__：返回迭代对象
+	__getitem__：能像列表一样通过下标获取元素值
+	__setitem__
+	__delitem__
+	__getattr__
+	__call__
+
+
+	__str__：打印对象
+	__repr__：直接调用对象
+		直接显示变量调用的不是__str__()，而是__repr__()，两者的区别是__str__()
+		返回用户看到的字符串，而__repr__()返回程序开发者看到的字符串，
+		也就是说，__repr__()是为调试服务的。
+
+		通常__str__()和__repr__()代码都是一样的，所以，有个偷懒的写法：
+
+			class Student(object):
+				def __init__(self, name):
+					self.name = name
+				def __str__(self):
+					return 'Student object (name=%s)' % self.name
+				__repr__ = __str__
+
+	__iter__
+	__getitem__
+	__getattr__
+	__call__：
+		callable()函数，我们就可以判断一个对象是否是“可调用”对象。
+
+枚举类：
+	from enum import Enum
+	Month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+	'Sep', 'Oct', 'Nov', 'Dec'))
+
+	这样我们就获得了Month类型的枚举类，可以直接使用Month.Jan来引用一个常量，
+	或者枚举它的所有成员：
+			for name, member in Month.__members__.items():
+				print(name, '=>', member, ',', member.value)
+
+	value属性则是自动赋给成员的int常量，默认从1开始计数。
+	如果需要更精确地控制枚举类型，可以从Enum派生出自定义类：
+
+			from enum import Enum, unique
+
+			@unique
+			class Weekday(Enum):
+				Sun = 0 # Sun的value被设定为0
+				Mon = 1
+				Tue = 2
+				Wed = 3
+				Thu = 4
+				Fri = 5
+				Sat = 6
+	@unique装饰器可以帮助我们检查保证没有重复值。
+
+	访问这些枚举类型可以有若干种方法：
+			>>> day1 = Weekday.Mon
+			>>> print(day1)
+			Weekday.Mon
+			>>> print(Weekday.Tue)
+			Weekday.Tue
+			>>> print(Weekday['Tue'])
+			Weekday.Tue
+			>>> print(Weekday.Tue.value)
+			2
+			>>> print(day1 == Weekday.Mon)
+			True
+			>>> print(day1 == Weekday.Tue)
+			False
+			>>> print(Weekday(1))
+			Weekday.Mon
+			>>> print(day1 == Weekday(1))
+			True
+			>>> for name, member in Weekday.__members__.items():
+			...     print(name, '=>', member)
+			...
+			Sun => Weekday.Sun
+			Mon => Weekday.Mon
+			Tue => Weekday.Tue
+			Wed => Weekday.Wed
+			Thu => Weekday.Thu
+			Fri => Weekday.Fri
+			Sat => Weekday.Sat
+
+	可见，既可以用成员名称引用枚举常量，又可以直接根据value的值获得枚举常量。
+
+	枚举类小结：
+	Enum可以把一组相关常量定义在一个class中，且class不可变，而且成员可以直接比较。
+
+
+元类：
+	type()：
+	metaclass元类：
+
+========================================================================
+
+错误、调试和测试
+
+try
+	try的机制：
+	try:
+		print('try...')
+		r = 10 / int('2')
+		print('result:', r)
+	except ValueError as e:
+		print('ValueError:', e)
+	except ZeroDivisionError as e:
+		print('ZeroDivisionError:', e)
+	else:
+		print('no error!')
+	finally:
+		print('finally...')
+	print('END')
+
+	当我们认为某些代码可能会出错时，就可以用try来运行这段代码，如果执行出错，
+	则后续代码不会继续执行，而是直接跳转至错误处理代码，即except语句块，
+	执行完except后，如果有finally语句块，则执行finally语句块，至此，执行完毕。
+
+	如果不捕获错误，自然可以让Python解释器来打印出错误堆栈，但程序也被结束了。
+	既然我们能捕获错误，就可以把错误堆栈打印出来，然后分析错误原因，
+	同时，让程序继续执行下去。
+
+	Python的错误其实也是class，所有的错误类型都继承自BaseException，
+	所以在使用except时需要注意的是，它不但捕获该类型的错误，还把其子类也“一网打尽”。
+
+记录错误：
+	Python内置的logging模块可以非常容易地记录错误信息：
+		import logging
+
+		def foo(s):
+			return 10 / int(s)
+
+		def bar(s):
+			return foo(s) * 2
+
+		def main():
+			try:
+				bar('0')
+			except Exception as e:
+				logging.exception(e)
+
+		main()
+		print('END')
+	通过配置，logging还可以把错误记录到日志文件里，方便事后排查。
+
+抛出错误：
+	因为错误是class，捕获一个错误就是捕获到该class的一个实例。
+	因此，错误并不是凭空产生的，而是有意创建并抛出的。
+	Python的内置函数会抛出很多类型的错误，我们自己编写的函数也可以抛出错误。
+
+	如果要抛出错误，首先根据需要，可以定义一个错误的class，选择好继承关系，
+	然后，用raise语句抛出一个错误的实例：
+		class FooError(ValueError):
+			pass
+
+		def foo(s):
+			n = int(s)
+			if n==0:
+				raise FooError('invalid value: %s' % s)
+			return 10 / n
+
+		foo('0')
+	执行，可以最后跟踪到我们自己定义的错误：
+
+	只有在必要的时候才定义我们自己的错误类型。
+	如果可以选择Python已有的内置的错误类型（比如ValueError，TypeError），
+	尽量使用Python内置的错误类型。
+
+	最后，我们来看另一种错误处理的方式：
+		def foo(s):
+			n = int(s)
+			if n==0:
+				raise ValueError('invalid value: %s' % s)
+			return 10 / n
+
+		def bar():
+			try:
+				foo('0')
+			except ValueError as e:
+				print('ValueError!')
+				raise
+
+		bar()
+	在bar()函数中，我们明明已经捕获了错误，但是，打印一个ValueError!后，
+	又把错误通过raise语句抛出去了，这不有病么？
+
+	其实这种错误处理方式不但没病，而且相当常见。捕获错误目的只是记录一下，
+	便于后续追踪。但是，由于当前函数不知道应该怎么处理该错误，所以，最恰当的方式
+	是继续往上抛，让顶层调用者去处理。好比一个员工处理不了一个问题时，就把问题抛给
+	他的老板，如果他的老板也处理不了，就一直往上抛，最终会抛给CEO去处理。
+
+	raise语句如果不带参数，就会把当前错误原样抛出。
+	此外，在except中raise一个Error，还可以把一种类型的错误转化成另一种类型：
+		try:
+			10 / 0
+		except ZeroDivisionError:
+			raise ValueError('input error!')
+	只要是合理的转换逻辑就可以，但是，决不应该把一个IOError转换成毫不相干的ValueError。
+
+错误处理小结：
+	Python内置的try...except...finally用来处理错误十分方便。
+	出错时，会分析错误信息并定位错误发生的代码位置才是最关键的。
+
+	程序也可以主动抛出错误，让调用者来处理相应的错误。
+	但是，应该在文档中写清楚可能会抛出哪些错误，以及错误产生的原因。
+
+调试：
+	(1)打印，第一种方法简单直接粗暴有效，就是用print()把可能有问题的变量打印出来看看
+	(2)断言，凡是用print()来辅助查看的地方，都可以用断言（assert）来替代：
+			assert n != 0, 'n is zero!'
+			assert的意思是，表达式n != 0应该是True，
+			否则，根据程序运行的逻辑，后面的代码肯定会出错。
+			如果断言失败，assert语句本身就会抛出AssertionError
+	(3)logging，和assert比，logging不会抛出错误，而且可以输出到文件：
+			import logging
+			s = '0'
+			n = int(s)
+			logging.info('n = %d' % n)
+			print(10 / n)
+		logging.info()就可以输出一段文本。运行，发现除了ZeroDivisionError，
+		没有任何信息。怎么回事？
+
+		别急，在import logging之后添加一行配置再试试：
+			import logging
+			logging.basicConfig(level=logging.INFO)
+		看到输出了：
+			$ python3 err.py
+			INFO:root:n = 0
+			Traceback (most recent call last):
+			  File "err.py", line 8, in <module>
+				print(10 / n)
+			ZeroDivisionError: division by zero
+		这就是logging的好处，它允许你指定记录信息的级别，有debug，info，warning，error等
+		几个级别，当我们指定level=INFO时，logging.debug就不起作用了。
+		同理，指定level=WARNING后，debug和info就不起作用了。
+		这样一来，你可以放心地输出不同级别的信息，也不用删除，
+		最后统一控制输出哪个级别的信息。
+
+		logging的另一个好处是通过简单的配置，一条语句可以同时输出到不同的地方，
+		比如console和文件。
+	(4)pdb，启动Python的调试器pdb，让程序以单步方式运行，可以随时查看运行状态
+		单步调试：
+		pdb.set_trace()设置断点：
+			import pdb
+			s = '0'
+			n = int(s)
+			pdb.set_trace() # 运行到这里会自动暂停
+			print(10 / n)
+
+	(5)IDE
+
+	调试小结：
+		写程序最痛苦的事情莫过于调试，程序往往会以你意想不到的流程来运行，
+		你期待执行的语句其实根本没有执行，这时候，就需要调试了。
+
+		虽然用IDE调试起来比较方便，但是最后你会发现，logging才是终极武器
+
+单元测试：
+	“测试驱动开发”（TDD：Test-Driven Development）
+	示例：
+		mydict.py代码如下：
+		class Dict(dict):
+			def __init__(self, **kw):
+				super().__init__(**kw)
+
+			def __getattr__(self, key):
+				try:
+					return self[key]
+				except KeyError:
+					raise AttributeError(r"'Dict' object has no attribute '%s'" % key)
+
+			def __setattr__(self, key, value):
+				self[key] = value
+
+
+		编写单元测试需要引入Python自带的unittest模块，编写mydict_test.py如下：
+		import unittest
+		from mydict import Dict
+		class TestDict(unittest.TestCase):
+
+			def test_init(self):
+				d = Dict(a=1, b='test')
+				self.assertEqual(d.a, 1)
+				self.assertEqual(d.b, 'test')
+				self.assertTrue(isinstance(d, dict))
+
+			def test_key(self):
+				d = Dict()
+				d['key'] = 'value'
+				self.assertEqual(d.key, 'value')
+
+			def test_attr(self):
+				d = Dict()
+				d.key = 'value'
+				self.assertTrue('key' in d)
+				self.assertEqual(d['key'], 'value')
+
+			def test_keyerror(self):
+				d = Dict()
+				with self.assertRaises(KeyError):
+					value = d['empty']
+
+			def test_attrerror(self):
+				d = Dict()
+				with self.assertRaises(AttributeError):
+					value = d.empty
+
+		编写单元测试时，我们需要编写一个测试类，从unittest.TestCase继承。
+
+		以test开头的方法就是测试方法，不以test开头的方法不被认为是测试方法，
+		测试的时候不会被执行。
+
+		对每一类测试都需要编写一个test_xxx()方法。
+		由于unittest.TestCase提供了很多内置的条件判断，
+		我们只需要调用这些方法就可以断言输出是否是我们所期望的。
+		最常用的断言就是assertEqual()：
+		self.assertEqual(abs(-1), 1) # 断言函数返回的结果与1相等
+
+		另一种重要的断言就是期待抛出指定类型的Error，
+		比如通过d['empty']访问不存在的key时，断言会抛出KeyError：
+		with self.assertRaises(KeyError):
+			value = d['empty']
+
+		而通过d.empty访问不存在的key时，我们期待抛出AttributeError：
+		with self.assertRaises(AttributeError):
+			value = d.empty
+
+	运行单元测试
+
+	一旦编写好单元测试，我们就可以运行单元测试。
+	最简单的运行方式是在mydict_test.py的最后加上两行代码：
+
+	if __name__ == '__main__':
+		unittest.main()
+	这样就可以把mydict_test.py当做正常的python脚本运行：
+	$ python3 mydict_test.py
+
+	另一种方法是在命令行通过参数-m unittest直接运行单元测试：
+	$ python3 -m unittest mydict_test
+
+	这是推荐的做法，因为这样可以一次批量运行很多单元测试，
+	并且，有很多工具可以自动来运行这些单元测试。
+
+
+	setUp与tearDown：
+		可以在单元测试中编写两个特殊的setUp()和tearDown()方法。
+		这两个方法会分别在每调用一个测试方法的前后分别被执行。
+
+		setUp()和tearDown()方法有什么用呢？
+		设想你的测试需要启动一个数据库，这时，就可以在setUp()方法中连接数据库，
+			在tearDown()方法中关闭数据库，这样，不必在每个测试方法中重复相同的代码：
+			class TestDict(unittest.TestCase):
+				def setUp(self):
+					print('setUp...')
+
+				def tearDown(self):
+					print('tearDown...')
+		可以再次运行测试看看每个测试方法调用前后是否会打印出setUp...和tearDown...。
+
+	单元测试小结：
+		单元测试可以有效地测试某个程序模块的行为，是未来重构代码的信心保证。
+		单元测试的测试用例要覆盖常用的输入组合、边界条件和异常。
+		单元测试代码要非常简单，如果测试代码太复杂，那么测试代码本身就可能有bug。
+
+文档测试：
+	doctest非常有用，不但可以用来测试，还可以直接作为示例代码。
+	通过某些文档生成工具，就可以自动把包含doctest的注释提取出来。
+	用户看文档的时候，同时也看到了doctest。
+
+===================================================================
+
+IO 编程
+	Output
+	Input
+    同步IO
+	异步IO
+	使用异步IO来编写程序性能会远远高于同步IO，但是异步IO的缺点是编程模型复杂。
+
+	文件读写：
+		try:
+			f = open('/path/to/file', 'r')
+			print(f.read())
+		finally:
+			if f:
+				f.close()
+
+		但是每次都这么写实在太繁琐，所以，Python引入了with语句来自动帮我们调用close()方法：
+		with open('/path/to/file', 'r') as f:
+			print(f.read())
+
+		调用read()会一次性读取文件的全部内容，如果文件有10G，内存就爆了，
+		所以，要保险起见，可以反复调用read(size)方法，每次最多读取size个字节的内容。
+		另外，调用readline()可以每次读取一行内容，调用readlines()一次读取所有内容
+		并按行返回list。因此，要根据需要决定怎么调用。
+
+		如果文件很小，read()一次性读取最方便；
+		如果不能确定文件大小，反复调用read(size)比较保险；
+		如果是配置文件，调用readlines()最方便：
+			for line in f.readlines():
+				print(line.strip()) # 把末尾的'\n'删掉
+
+	file-like Object
+		像open()函数返回的这种有个read()方法的对象，在Python中统称为file-like Object。
+		除了file外，还可以是内存的字节流，网络流，自定义流等等。
+		file-like Object不要求从特定类继承，只要写个read()方法就行。
+		StringIO就是在内存中创建的file-like Object，常用作临时缓冲。
+
+	f = open('/Users/michael/gbk.txt', 'r', encoding='gbk', errors='ignore')
+
+	在Python中，文件读写是通过open()函数打开的文件对象完成的。
+	使用with语句操作文件IO是个好习惯。
+
+StringIO和BytesIO
+	StringIO和BytesIO是在内存中操作str和bytes的方法，使得和读写文件具有一致的接口。
+		>>> from io import StringIO
+		>>> f = StringIO()
+		>>> f.write('hello')
+		5
+		>>> f.write(' ')
+		1
+		>>> f.write('world!')
+		6
+		>>> print(f.getvalue())
+		hello world!
+
+
+		>>> from io import StringIO
+		>>> f = StringIO('Hello!\nHi!\nGoodbye!')
+		>>> while True:
+		...     s = f.readline()
+		...     if s == '':
+		...         break
+		...     print(s.strip())
+		...
+		Hello!
+		Hi!
+		Goodbye!
+
+
+
+		>>> from io import BytesIO
+		>>> f = BytesIO()
+		>>> f.write('中文'.encode('utf-8'))
+		6
+		>>> print(f.getvalue())
+		b'\xe4\xb8\xad\xe6\x96\x87'
+
+		>>> from io import StringIO
+		>>> f = BytesIO(b'\xe4\xb8\xad\xe6\x96\x87')
+		>>> f.read()
+		b'\xe4\xb8\xad\xe6\x96\x87'
+
+
+操作文件和目录：
+    os模块：
+	os.path模块：
+	shutil模块：
+
+	要列出当前目录下的所有目录，只需要一行代码：
+	[x for x in os.listdir('.') if os.path.isdir(x)]
+	['.lein', '.local', '.m2', '.npm', '.ssh', '.Trash', '.vim']
+
+	要列出所有的.py文件，也只需一行代码：
+	[x for x in os.listdir('.') if os.path.isfile(x) and os.path.splitext(x)[1]=='.py']
+	['apis.py', 'config.py', 'models.py', 'pymonitor.py', 'test_db.py', 'urls.py']
+
+序列化：
+	把变量从内存中变成可存储或传输的过程称之为序列化，
+	在Python中叫pickling，在其他语言中也被称之为serialization，
+	marshalling，flattening等等，都是一个意思。
+
+	序列化之后，就可以把序列化后的内容写入磁盘，或者通过网络传输到别的机器上。
+
+	反过来，把变量内容从序列化的对象重新读到内存里称之为反序列化，即unpickling。
+
+	Python提供了pickle模块来实现序列化。
+		首先，我们尝试把一个对象序列化并写入文件：
+		>>> import pickle
+		>>> d = dict(name='Bob', age=20, score=88)
+		>>> pickle.dumps(d)
+
+		pickle.dumps()方法把任意对象序列化成一个bytes，
+		然后，就可以把这个bytes写入文件。或者用另一个方法pickle.dump()直接
+		把对象序列化后写入一个file-like Object：
+		>>> f = open('dump.txt', 'wb')
+		>>> pickle.dump(d, f)
+		>>> f.close()
+
+		当我们要把对象从磁盘读到内存时，可以先把内容读到一个bytes，
+		然后用pickle.loads()方法反序列化出对象，也可以直接用pickle.load()方法
+		从一个file-like Object中直接反序列化出对象。
+		我们打开另一个Python命令行来反序列化刚才保存的对象：
+		>>> f = open('dump.txt', 'rb')
+		>>> d = pickle.load(f)
+		>>> f.close()
+		>>> d
+		{'age': 20, 'score': 88, 'name': 'Bob'}
+
+		Pickle的问题和所有其他编程语言特有的序列化问题一样，
+		就是它只能用于Python，并且可能不同版本的Python彼此都不兼容，
+		因此，只能用Pickle保存那些不重要的数据，不能成功地反序列化也没关系。
+
+	JSON：
+		如果我们要在不同的编程语言之间传递对象，就必须把对象序列化为标准格式，
+		比如XML，但更好的方法是序列化为JSON，因为JSON表示出来就是一个字符串，
+		可以被所有语言读取，也可以方便地存储到磁盘或者通过网络传输。
+		JSON不仅是标准格式，并且比XML更快，而且可以直接在Web页面中读取，非常方便。
+
+		JSON表示的对象就是标准的JavaScript语言的对象，JSON和Python内置的数据类型对应如下：
+				JSON类型	Python类型
+				{}			dict
+				[]			list
+				"string"	str
+				1234.56		int或float
+				true/false	True/False
+				null		None
+		Python内置的json模块提供了非常完善的Python对象到JSON格式的转换。
+		我们先看看如何把Python对象变成一个JSON：
+			>>> import json
+			>>> d = dict(name='Bob', age=20, score=88)
+			>>> json.dumps(d)
+			'{"age": 20, "score": 88, "name": "Bob"}'
+		dumps()方法返回一个str，内容就是标准的JSON。
+		类似的，dump()方法可以直接把JSON写入一个file-like Object。
+
+		要把JSON反序列化为Python对象，用loads()或者对应的load()方法，
+		前者把JSON的字符串反序列化，后者从file-like Object中读取字符串并反序列化：
+			>>> json_str = '{"age": 20, "score": 88, "name": "Bob"}'
+			>>> json.loads(json_str)
+			{'age': 20, 'score': 88, 'name': 'Bob'}
+
+		由于JSON标准规定JSON编码是UTF-8，
+		所以我们总是能正确地在Python的str与JSON的字符串之间转换。
+
+	JSON进阶：
+		Python的dict对象可以直接序列化为JSON的{}，
+		不过，很多时候，我们更喜欢用class表示对象，比如定义Student类，然后序列化：
+
+		默认情况下，dumps()方法不知道如何将Student实例变为一个JSON的{}对象。
+		可选参数default就是把任意一个对象变成一个可序列为JSON的对象，
+		我们只需要为Student专门写一个转换函数，再把函数传进去即可：
+				def student2dict(std):
+					return {
+						'name': std.name,
+						'age': std.age,
+						'score': std.score
+					}
+		这样，Student实例首先被student2dict()函数转换成dict，然后再被顺利序列化为JSON：
+				>>> print(json.dumps(s, default=student2dict))
+				{"age": 20, "name": "Bob", "score": 88}
+
+		不过，下次如果遇到一个Teacher类的实例，照样无法序列化为JSON。
+		我们可以偷个懒，把任意class的实例变为dict：
+				print(json.dumps(s, default=lambda obj: obj.__dict__))
+
+		因为通常class的实例都有一个__dict__属性，它就是一个dict，用来存储实例变量。
+		也有少数例外，比如定义了__slots__的class。
+
+		同样的道理，如果我们要把JSON反序列化为一个Student对象实例，
+		loads()方法首先转换出一个dict对象，然后，我们传入的object_hook函数
+		负责把dict转换为Student实例：
+			def dict2student(d):
+				return Student(d['name'], d['age'], d['score'])
+
+		运行结果如下：
+		>>> json_str = '{"age": 20, "score": 88, "name": "Bob"}'
+		>>> print(json.loads(json_str, object_hook=dict2student))
+		<__main__.Student object at 0x10cd3c190>
+		打印出的是反序列化的Student实例对象。
+
+	序列化小结：
+		Python语言特定的序列化模块是pickle，但如果要把序列化搞得更通用、更符合Web标准，
+		就可以使用json模块。
+
+		json模块的dumps()和loads()函数是定义得非常好的接口的典范。
+		当我们使用时，只需要传入一个必须的参数。但是，当默认的序列化或反序列机制不满足
+		我们的要求时，我们又可以传入更多的参数来定制序列化或反序列化的规则，
+		既做到了接口简单易用，又做到了充分的扩展性和灵活性。
+
+================================================================
+
+进程和线程
+	真正的并行执行多任务只能在多核CPU上实现，但是，由于任务数量远远多于CPU的核心数量，
+	所以，操作系统也会自动把很多任务轮流调度到每个核心上执行。
+
+	把进程内的这些“子任务”称为线程（Thread）。
+
+	多任务的实现有3种方式：
+		多进程模式；
+		多线程模式；
+		多进程+多线程模式。
+
+	多进程：
+		多进程（multiprocessing）
+
+	多线程：
+		Python的标准库提供了两个模块：_thread和threading，_thread是低级模块，
+		threading是高级模块，对_thread进行了封装。绝大多数情况下，
+		我们只需要使用threading这个高级模块。
+
+=============================================================================
+
+正则表达式
+	re模块：
+		regex
+
+=============================================================================
+
+常用内建模块
+
+datetime模块：
+	格林威治时间UTC+0:00时区
+	epoch time
+
+	>>> from datetime import datetime
+	获取当前日期和时间
+		>>> now = datetime.now() # 获取当前datetime
+
+	获取指定日期和时间
+		>>> dt = datetime(2016, 2, 5, 12, 20) # 用指定日期时间创建datetime
+
+	datetime转换为timestamp
+		>>> dt = datetime.now()
+		>>> dt.timestamp() # 把timestamp转换为datetime，返回数据单位是秒
+
+	timestamp转换为datetime
+		>>> t = 1429417200.0
+		>>> print(datetime.fromtimestamp(t))
+
+	str转换为datetime
+		>>> cday = datetime.strptime('2015-6-1 18:19:59', '%Y-%m-%d %H:%M:%S')
+		>>> print(cday)
+
+	datetime转换为str
+		>>> now = datetime.now()
+		>>> print(now.strftime('%a, %b %d %H:%M'))
+		Mon, May 05 16:28
+
+	datetime加减
+		对日期和时间进行加减实际上就是把datetime往后或往前计算，得到新的datetime。
+		加减可以直接用+和-运算符，不过需要导入timedelta这个类：
+				>>> from datetime import datetime, timedelta
+				>>> now = datetime.now()
+				>>> now
+				datetime.datetime(2015, 5, 18, 16, 57, 3, 540997)
+				>>> now + timedelta(hours=10)
+				datetime.datetime(2015, 5, 19, 2, 57, 3, 540997)
+				>>> now - timedelta(days=1)
+				datetime.datetime(2015, 5, 17, 16, 57, 3, 540997)
+				>>> now + timedelta(days=2, hours=12)
+				datetime.datetime(2015, 5, 21, 4, 57, 3, 540997)
+		可见，使用timedelta你可以很容易地算出前几天和后几天的时刻。
+
+	datetime表示的时间需要时区信息才能确定一个特定的时间，否则只能视为本地时间。
+	如果要存储datetime，最佳方法是将其转换为timestamp再存储，
+	因为timestamp的值与时区完全无关。
+
+------------------------------------------------------------
+
+collections：
+	collections是Python内建的一个集合模块，提供了许多有用的集合类。
+
+namedtuple
+	我们知道tuple可以表示不变集合，例如，一个点的二维坐标就可以表示成：
+			>>> p = (1, 2)
+	但是，看到(1, 2)，很难看出这个tuple是用来表示一个坐标的。
+
+	定义一个class又小题大做了，这时，namedtuple就派上了用场：
+			>>> from collections import namedtuple
+			>>> Point = namedtuple('Point', ['x', 'y'])
+			>>> p = Point(1, 2)
+			>>> p.x
+			1
+			>>> p.y
+			2
+	namedtuple是一个函数，它用来创建一个自定义的tuple对象，并且规定了tuple元素的个数，
+	并可以用属性而不是索引来引用tuple的某个元素。
+
+	这样一来，我们用namedtuple可以很方便地定义一种数据类型，它具备tuple的不变性，
+	又可以根据属性来引用，使用十分方便。
+
+	可以验证创建的Point对象是tuple的一种子类：
+			>>> isinstance(p, Point)
+			True
+			>>> isinstance(p, tuple)
+			True
+
+	类似的，如果要用坐标和半径表示一个圆，也可以用namedtuple定义：
+			# namedtuple('名称', [属性list]):
+			Circle = namedtuple('Circle', ['x', 'y', 'r'])
+
+deque
+	使用list存储数据时，按索引访问元素很快，但是插入和删除元素就很慢了，
+	因为list是线性存储，数据量大的时候，插入和删除效率很低。
+
+	deque是为了高效实现插入和删除操作的双向列表，适合用于队列和栈：
+			>>> from collections import deque
+			>>> q = deque(['a', 'b', 'c'])
+			>>> q.append('x')
+			>>> q.appendleft('y')
+			>>> q
+			deque(['y', 'a', 'b', 'c', 'x'])
+
+	deque除了实现list的append()和pop()外，还支持appendleft()和popleft()，
+	这样就可以非常高效地往头部添加或删除元素。
+
+
+defaultdict
+
+	使用dict时，如果引用的Key不存在，就会抛出KeyError。如果希望key不存在时，
+	返回一个默认值，就可以用defaultdict：
+			>>> from collections import defaultdict
+			>>> dd = defaultdict(lambda: 'N/A')
+			>>> dd['key1'] = 'abc'
+			>>> dd['key1'] # key1存在
+			'abc'
+			>>> dd['key2'] # key2不存在，返回默认值
+			'N/A'
+
+	注意默认值是调用函数返回的，而函数在创建defaultdict对象时传入。
+	除了在Key不存在时返回默认值，defaultdict的其他行为跟dict是完全一样的。
+
+
+OrderedDict
+	使用dict时，Key是无序的。在对dict做迭代时，我们无法确定Key的顺序。
+	如果要保持Key的顺序，可以用OrderedDict：
+			>>> from collections import OrderedDict
+			>>> d = dict([('a', 1), ('b', 2), ('c', 3)])
+			>>> d # dict的Key是无序的
+			{'a': 1, 'c': 3, 'b': 2}
+			>>> od = OrderedDict([('a', 1), ('b', 2), ('c', 3)])
+			>>> od # OrderedDict的Key是有序的
+			OrderedDict([('a', 1), ('b', 2), ('c', 3)])
+
+	注意，OrderedDict的Key会按照插入的顺序排列，不是Key本身排序：
+			>>> od = OrderedDict()
+			>>> od['z'] = 1
+			>>> od['y'] = 2
+			>>> od['x'] = 3
+			>>> list(od.keys()) # 按照插入的Key的顺序返回
+			['z', 'y', 'x']
+
+
+	OrderedDict可以实现一个FIFO（先进先出）的dict，当容量超出限制时，先删除最早添加的Key：
+			from collections import OrderedDict
+			class LastUpdatedOrderedDict(OrderedDict):
+
+				def __init__(self, capacity):
+					super(LastUpdatedOrderedDict, self).__init__()
+					self._capacity = capacity
+
+				def __setitem__(self, key, value):
+					containsKey = 1 if key in self else 0
+					if len(self) - containsKey >= self._capacity:
+						last = self.popitem(last=False)
+						print('remove:', last)
+					if containsKey:
+						del self[key]
+						print('set:', (key, value))
+					else:
+						print('add:', (key, value))
+					OrderedDict.__setitem__(self, key, value)
+
+
+Counter
+	Counter是一个简单的计数器，例如，统计字符出现的个数：
+			>>> from collections import Counter
+			>>> c = Counter()
+			>>> for ch in 'programming':
+			...     c[ch] = c[ch] + 1
+			...
+			>>> c
+			Counter({'g': 2, 'm': 2, 'r': 2, 'a': 1, 'i': 1, 'o': 1, 'n': 1, 'p': 1})
+	Counter实际上也是dict的一个子类，上面的结果可以看出，字符'g'、'm'、'r'各
+	出现了两次，其他字符各出现了一次。
+
+---------------------------------------------------------------------
+
+Base64
+	Base64是一种用64个字符来表示任意二进制数据的方法。
+	如果要让记事本这样的文本处理软件能处理二进制数据，就需要一个二进制到
+	字符串的转换方法。Base64是一种最常见的二进制编码方法。
+
+	Base64是一种任意二进制到文本字符串的编码方法，常用于在URL、Cookie、
+	网页中传输少量二进制数据。
+
+			>>> import base64
+			>>> base64.b64encode(b'binary\x00string')
+			b'YmluYXJ5AHN0cmluZw=='
+			>>> base64.b64decode(b'YmluYXJ5AHN0cmluZw==')
+			b'binary\x00string'
+
+	由于标准的Base64编码后可能出现字符+和/，在URL中就不能直接作为参数，所以又有一种
+	"url safe"的base64编码，其实就是把字符+和/分别变成-和_：
+			>>> base64.b64encode(b'i\xb7\x1d\xfb\xef\xff')
+			b'abcd++//'
+			>>> base64.urlsafe_b64encode(b'i\xb7\x1d\xfb\xef\xff')
+			b'abcd--__'
+			>>> base64.urlsafe_b64decode('abcd--__')
+			b'i\xb7\x1d\xfb\xef\xff'
+
+hashlib：
+	摘要算法简介
+	Python的hashlib提供了常见的摘要算法，如MD5，SHA1等等。
+
+	什么是摘要算法呢？
+	摘要算法又称哈希算法、散列算法。它通过一个函数，
+	把任意长度的数据转换为一个长度固定的数据串（通常用16进制的字符串表示）。
+
+	举个例子，你写了一篇文章，内容是一个字符串'how to use python hashlib - by Michael'，
+	并附上这篇文章的摘要是'2d73d4f15c0db7f5ecb321b6a65e5d6d'。如果有人篡改了你的文章，
+	并发表为'how to use python hashlib - by Bob'，你可以一下子指出Bob篡改了你的文章，
+	因为根据'how to use python hashlib - by Bob'计算出的摘要不同于原始文章的摘要。
+
+	可见，摘要算法就是通过摘要函数f()对任意长度的数据data计算出固定长度的摘要digest，
+	目的是为了发现原始数据是否被人篡改过。
+
+	摘要算法之所以能指出数据是否被篡改过，就是因为摘要函数是一个单向函数，
+	计算f(data)很容易，但通过digest反推data却非常困难。而且，对原始数据做
+	一个bit的修改，都会导致计算出的摘要完全不同。
+
+	我们以常见的摘要算法MD5为例，计算出一个字符串的MD5值：
+		import hashlib
+
+		md5 = hashlib.md5()
+		md5.update('how to use md5 in python hashlib?'.encode('utf-8'))
+		print(md5.hexdigest())
+
+	计算结果如下：
+		d26a53750bc40b38b65a520292f69306
+
+	如果数据量很大，可以分块多次调用update()，最后计算的结果是一样的：
+		import hashlib
+
+		md5 = hashlib.md5()
+		md5.update('how to use md5 in '.encode('utf-8'))
+		md5.update('python hashlib?'.encode('utf-8'))
+		print(md5.hexdigest())
+
+	MD5是最常见的摘要算法，速度很快，生成结果是固定的128 bit字节，
+	通常用一个32位的16进制字符串表示。
+
+	另一种常见的摘要算法是SHA1，调用SHA1和调用MD5完全类似：
+		import hashlib
+		sha1 = hashlib.sha1()
+		sha1.update('how to use sha1 in '.encode('utf-8'))
+		sha1.update('python hashlib?'.encode('utf-8'))
+		print(sha1.hexdigest())
+
+	SHA1的结果是160 bit字节，通常用一个40位的16进制字符串表示。
+	比SHA1更安全的算法是SHA256和SHA512，不过越安全的算法不仅越慢，而且摘要长度更长。
+
+	有没有可能两个不同的数据通过某个摘要算法得到了相同的摘要？
+	完全有可能，因为任何摘要算法都是把无限多的数据集合映射到一个有限的集合中。
+	这种情况称为碰撞，比如Bob试图根据你的摘要反推出一篇文章'how to learn hashlib
+	in python - by Bob'，并且这篇文章的摘要恰好和你的文章完全一致，这种情况也并非
+	不可能出现，但是非常非常困难。
+
+	摘要算法应用
+		正确的保存口令的方式是不存储用户的明文口令，而是存储用户口令的摘要，比如MD5：
+			username | password
+			---------+---------------------------------
+			michael  | e10adc3949ba59abbe56e057f20f883e
+			bob      | 878ef96e86145580c38c87f0410ad153
+			alice    | 99b1c2188db85afee403b1536010c2c9
+		当用户登录时，首先计算用户输入的明文口令的MD5，然后和数据库存储的MD5对比，
+		如果一致，说明口令输入正确，如果不一致，口令肯定错误。
+
+
+	存储MD5的好处是即使运维人员能访问数据库，也无法获知用户的明文口令。
+	设计一个验证用户登录的函数，根据用户输入的口令是否正确，返回True或False：
+		db = {
+			'michael': 'e10adc3949ba59abbe56e057f20f883e',
+			'bob': '878ef96e86145580c38c87f0410ad153',
+			'alice': '99b1c2188db85afee403b1536010c2c9'
+		}
+
+		def login(user, password):
+			pass
+	采用MD5存储口令是否就一定安全呢？也不一定。
+	假设你是一个黑客，已经拿到了存储MD5口令的数据库，如何通过MD5反推用户的明文
+	口令呢？暴力破解费事费力，真正的黑客不会这么干。
+
+	考虑这么个情况，很多用户喜欢用123456，888888，password这些简单的口令，
+	于是，黑客可以事先计算出这些常用口令的MD5值，得到一个反推表：
+		'e10adc3949ba59abbe56e057f20f883e': '123456'
+		'21218cca77804d2ba1922c33e0151105': '888888'
+		'5f4dcc3b5aa765d61d8327deb882cf99': 'password'
+	这样，无需破解，只需要对比数据库的MD5，黑客就获得了使用常用口令的用户账号。
+
+	对于用户来讲，当然不要使用过于简单的口令。
+	但是，我们能否在程序设计上对简单口令加强保护呢？
+
+	由于常用口令的MD5值很容易被计算出来，所以，要确保存储的用户口令不是那些已经被计算
+	出来的常用口令的MD5，这一方法通过对原始口令加一个复杂字符串来实现，俗称“加盐”：
+			def calc_md5(password):
+				return get_md5(password + 'the-Salt')
+
+	经过Salt处理的MD5口令，只要Salt不被黑客知道，即使用户输入简单口令，
+	也很难通过MD5反推明文口令。
+
+	但是如果有两个用户都使用了相同的简单口令比如123456，在数据库中，将存储两条相同的MD5值，
+	这说明这两个用户的口令是一样的。有没有办法让使用相同口令的用户存储不同的MD5呢？
+
+	如果假定用户无法修改登录名，就可以通过把登录名作为Salt的一部分来计算MD5，
+	从而实现相同口令的用户也存储不同的MD5。
+
+
+	摘要算法在很多地方都有广泛的应用。要注意摘要算法不是加密算法，不能用于加密
+	（因为无法通过摘要反推明文），只能用于防篡改，但是它的单向计算特性决定了可以
+	在不存储明文口令的情况下验证用户口令。
+
+------------------------------------------------------------------
+
+itertools模块
+	Python的内建模块itertools提供了非常有用的用于操作迭代对象的函数。
+
+------------------------------------------------------------------
+XML：
+	DOM vs SAX
+	操作XML有两种方法：DOM和SAX。
+	DOM会把整个XML读入内存，解析为树，因此占用内存大，解析慢，优点是可以任意
+	遍历树的节点。SAX是流模式，边读边解析，占用内存小，解析快，缺点是我们需要
+	自己处理事件。正常情况下，优先考虑SAX，因为DOM实在太占内存。
+
+	在Python中使用SAX解析XML非常简洁，通常我们关心的事件是start_element，
+	end_element和char_data，准备好这3个函数，然后就可以解析xml了。
+
+	举个例子，当SAX解析器读到一个节点时：<a href="/">python</a>
+	会产生3个事件：
+		start_element事件，在读取<a href="/">时；
+		char_data事件，在读取python时；
+		end_element事件，在读取</a>时。
+
+	用代码实验一下：
+			from xml.parsers.expat import ParserCreate
+
+			class DefaultSaxHandler(object):
+				def start_element(self, name, attrs):
+					print('sax:start_element: %s, attrs: %s' % (name, str(attrs)))
+
+				def end_element(self, name):
+					print('sax:end_element: %s' % name)
+
+				def char_data(self, text):
+					print('sax:char_data: %s' % text)
+
+			xml = r'''<?xml version="1.0"?>
+			<ol>
+				<li><a href="/python">Python</a></li>
+				<li><a href="/ruby">Ruby</a></li>
+			</ol>
+			'''
+
+			handler = DefaultSaxHandler()
+			parser = ParserCreate()
+			parser.StartElementHandler = handler.start_element
+			parser.EndElementHandler = handler.end_element
+			parser.CharacterDataHandler = handler.char_data
+			parser.Parse(xml)
+
+	需要注意的是读取一大段字符串时，CharacterDataHandler可能被多次调用，
+	所以需要自己保存起来，在EndElementHandler里面再合并。
+
+	除了解析XML外，如何生成XML呢？99%的情况下需要生成的XML结构都是非常简单的，
+	因此，最简单也是最有效的生成XML的方法是拼接字符串：
+			L = []
+			L.append(r'<?xml version="1.0"?>')
+			L.append(r'<root>')
+			L.append(encode('some & data'))
+			L.append(r'</root>')
+			return ''.join(L)
+	如果要生成复杂的XML呢？建议你不要用XML，改成JSON。
+
+	XML小结：
+		解析XML时，注意找出自己感兴趣的节点，响应事件时，把节点数据保存起来。
+		解析完毕后，就可以处理数据。
+
+-------------------------------------------------------------------
+
+HTMLParser：
+	如果我们要编写一个搜索引擎，第一步是用爬虫把目标网站的页面抓下来，
+	第二步就是解析该HTML页面，看看里面的内容到底是新闻、图片还是视频。
+
+	假设第一步已经完成了，第二步应该如何解析HTML呢？
+
+	HTML本质上是XML的子集，但是HTML的语法没有XML那么严格，
+	所以不能用标准的DOM或SAX来解析HTML。
+
+	好在Python提供了HTMLParser来非常方便地解析HTML，只需简单几行代码：
+			from html.parser import HTMLParser
+			from html.entities import name2codepoint
+
+			class MyHTMLParser(HTMLParser):
+
+				def handle_starttag(self, tag, attrs):
+					print('<%s>' % tag)
+
+				def handle_endtag(self, tag):
+					print('</%s>' % tag)
+
+				def handle_startendtag(self, tag, attrs):
+					print('<%s/>' % tag)
+
+				def handle_data(self, data):
+					print(data)
+
+				def handle_comment(self, data):
+					print('<!--', data, '-->')
+
+				def handle_entityref(self, name):
+					print('&%s;' % name)
+
+				def handle_charref(self, name):
+					print('&#%s;' % name)
+
+			parser = MyHTMLParser()
+			parser.feed('''<html>
+			<head></head>
+			<body>
+			<!-- test html parser -->
+				<p>Some <a href=\"#\">html</a> HTML&nbsp;tutorial...<br>END</p>
+			</body></html>''')
+
+	feed()方法可以多次调用，也就是不一定一次把整个HTML字符串都塞进去，
+	可以一部分一部分塞进去。
+
+	特殊字符有两种，一种是英文表示的&nbsp;，一种是数字表示的&#1234;，
+	这两种字符都可以通过Parser解析出来。
+
+	HTMLParser小结：
+		利用HTMLParser，可以把网页中的文本、图像等解析出来。
+
+	练习：
+		找一个网页，例如https://www.python.org/events/python-events/
+		，用浏览器查看源码并复制，然后尝试解析一下HTML，输出Python官网发布的
+		会议时间、名称和地点。
+
+-----------------------------------------
+
+urllib模块：
+	urllib提供了一系列用于操作URL的功能。
+	GET
+	POST
+	Handler
+
+	urllib提供的功能就是利用程序去执行各种HTTP请求。
+	如果要模拟浏览器完成特定功能，需要把请求伪装成浏览器。
+	伪装的方法是先监控浏览器发出的请求，再根据浏览器的请求头来伪装，
+	User-Agent头就是用来标识浏览器的。
+
+========================================================
+
+常用第三方模块
+
+PIL：
+	PIL：Python Imaging Library，已经是Python平台事实上的图像处理标准库了。
+	PIL功能非常强大，但API却非常简单易用。
+
+	由于PIL仅支持到Python 2.7，加上年久失修，于是一群志愿者在PIL的基础上创建了
+	兼容的版本，名字叫Pillow，支持最新Python 3.x，又加入了许多新特性，
+	因此，我们可以直接安装使用Pillow。
+
+========================================================================
+
+Pandas：
+	Python Data Analysis Library 或 pandas 是基于NumPy 的一种工具，该工具是为了解决
+	数据分析任务而创建的。Pandas 纳入了大量库和一些标准的数据模型，提供了高效地
+	操作大型数据集所需的工具。pandas提供了大量能使我们快速便捷地处理数据的函数和方法。
+	你很快就会发现，它是使Python成为强大而高效的数据分析环境的重要因素之一。
+
+=========================================================================
+
+virtualenv：
+	如果我们要同时开发多个应用程序，那这些应用程序都会共用一个Python，就是
+	安装在系统的Python 3。如果应用A需要jinja 2.7，而应用B需要jinja 2.6怎么办？
+
+	这种情况下，每个应用可能需要各自拥有一套“独立”的Python运行环境。
+	virtualenv就是用来为一个应用创建一套“隔离”的Python运行环境。
+
+	virtualenv为应用提供了隔离的Python运行环境，解决了不同应用间多版本的冲突问题。
+
+=========================================================================
+
+图形界面
+
+	Python支持多种图形界面的第三方库，包括：Tk/wxWidgets/Qt/GTK等等。
+
+	Python自带的库是支持Tk的Tkinter，使用Tkinter，无需安装任何包，就可以直接使用。
+
+	Python内置的Tkinter可以满足基本的GUI程序的要求，如果是非常复杂的GUI程序，
+	建议用操作系统原生支持的语言和库来编写。
+
+=========================================================================
+
+网络编程
+电子邮件
+访问数据库
+Web开发
+异步IO
